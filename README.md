@@ -29,20 +29,20 @@ GESTIA es un **asistente multi-agente** diseñado para asesorías/gestorías que
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        GESTIA CORE                               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │  Supervisor │  │   Router    │  │   Memory    │              │
-│  │  (Orquest.) │  │  (Intents)  │  │  (Multi-tenant)          │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
+│                        GESTIA CORE                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐             │
+│  │  Supervisor │  │   Router    │  │   Memory     │             │
+│  │  (Orquest.) │  │  (Intents)  │  │(Multi-tenant)│             │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘             │
 └─────────┼────────────────┼────────────────┼─────────────────────┘
           │                │                │
     ┌─────▼─────┐    ┌─────▼─────┐    ┌─────▼─────┐
-    │ MERCANTIL │    │  ADMIN    │    │ CONTABLE  │    ┌────────┐
-    │ Specialist│    │ Specialist│    │ Specialist│    │PERSONAL│
+    │ MERCANTIL │    │  ADMIN    │    │ CONTABLE  │    ┌──────────┐
+    │ Specialist│    │ Specialist│    │ Specialist│    │PERSONAL  │
     └───────────┘    └───────────┘    └───────────┘    │Specialist│
-                                                      └────────┘
+                                                       └──────────┘
     ┌─────────────────────────────────────────────────────────┐
-    │                    SHARED LAYER                          │
+    │                    SHARED LAYER                         │
     │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐    │
     │  │ Tenant   │ │ Document │ │ Calendar │ │ Comms    │    │
     │  │ Registry │ │ Vault    │ │Deadlines │ │ Portal   │    │
