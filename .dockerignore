@@ -1,0 +1,92 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Lock files
+# uv.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Docker
+docker-compose.override.yml
+
+# Data volumes
+postgres_data/
+redis_data/
+minio_data/
+n8n_data/
+
+# Uploads / Documents
+uploads/
+documents/
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.xml
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+certs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary
+*.tmp
+*.temp
+.tmp/
+temp/
+
+# Local overrides
+local.py
+local_settings.py
+config.local.py
+
+# Environment files (SECRETS!)
+.env
+.env.local
+.env.production
+.env.*.local

@@ -1,0 +1,209 @@
+{
+  "name": "gestia-calendar-sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "cronExpression": "0 6 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "cron-monday-6am",
+      "name": "Cron Monday 6AM",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get all active tenants\n// In production, query GESTIA API\nconst tenants = [\n  { tenant_id: 'demo-tenant-id', anio: new Date().getFullYear() },\n];\nreturn tenants.map(t => ({ json: t }));"
+      },
+      "id": "get-tenants",
+      "name": "Get Active Tenants",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-tenants",
+      "name": "Split Tenants",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Fetch AEAT calendar\nconst { tenant_id, anio } = $json;\n\n// AEAT calendar API (simplified)\nconst events = [\n  { titulo: 'Modelo 303 Q1', tipo_evento: 'iva_303', categoria: 'fiscal', fecha_limite: `${anio}-04-20T23:59:59Z`, anio_fiscal: anio, periodo: 'Q1', accion_sugerida: 'Recopilar facturas, calcular IVA, generar 303' },\n  { titulo: 'Modelo 303 Q2', tipo_evento: 'iva_303', categoria: 'fiscal', fecha_limite: `${anio}-07-20T23:59:59Z`, anio_fiscal: anio, periodo: 'Q2', accion_sugerida: 'Recopilar facturas, calcular IVA, generar 303' },\n  { titulo: 'Modelo 303 Q3', tipo_evento: 'iva_303', categoria: 'fiscal', fecha_limite: `${anio}-10-20T23:59:59Z`, anio_fiscal: anio, periodo: 'Q3', accion_sugerida: 'Recopilar facturas, calcular IVA, generar 303' },\n  { titulo: 'Modelo 303 Q4', tipo_evento: 'iva_303', categoria: 'fiscal', fecha_limite: `${anio+1}-01-20T23:59:59Z`, anio_fiscal: anio, periodo: 'Q4', accion_sugerida: 'Recopilar facturas, calcular IVA, generar 303' },\n  { titulo: 'Modelo 390', tipo_evento: 'iva_390', categoria: 'fiscal', fecha_limite: `${anio+1}-01-30T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Consolidar 4 trimestres, validar, presentar 390' },\n  { titulo: 'Modelo 200', tipo_evento: 'is_200', categoria: 'fiscal', fecha_limite: `${anio}-07-25T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Cerrar contabilidad, ajustes, calcular IS, generar 200' },\n  { titulo: 'Modelo 202 P1', tipo_evento: 'is_202_1', categoria: 'fiscal', fecha_limite: `${anio}-04-20T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Calcular base, generar 202' },\n  { titulo: 'Modelo 202 P2', tipo_evento: 'is_202_2', categoria: 'fiscal', fecha_limite: `${anio}-10-20T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Calcular base, generar 202' },\n  { titulo: 'Modelo 202 P3', tipo_evento: 'is_202_3', categoria: 'fiscal', fecha_limite: `${anio}-12-20T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Calcular base, generar 202' },\n  { titulo: 'Modelo 347', tipo_evento: 'inf_347', categoria: 'fiscal', fecha_limite: `${anio+1}-02-28T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Filtrar facturas >3005€, agrupar por NIF, generar 347' },\n];\n\nreturn events.map(e => ({ json: { ...e, tenant_id } }));"
+      },
+      "id": "generate-fiscal-events",
+      "name": "Generate Fiscal Events",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Fetch SS calendar\nconst { tenant_id, anio } = $json;\n\nconst events = [];\nfor (let m = 1; m <= 12; m++) {\n  const lastDay = new Date(anio, m, 0).getDate();\n  let dia = 20;\n  const d = new Date(anio, m-1, dia);\n  while (d.getDay() === 0 || d.getDay() === 6) dia--;\n  \n  events.push({\n    titulo: `TC1/TC2 ${m.toString().padStart(2,'0')}/${anio}`,\n    tipo_evento: 'tc1_tc2',\n    categoria: 'laboral',\n    fecha_limite: `${anio}-${m.toString().padStart(2,'0')}-${dia.toString().padStart(2,'0')}T23:59:59Z`,\n    anio_fiscal: anio,\n    periodo: `M${m.toString().padStart(2,'0')}`,\n    accion_sugerida: 'Calcular bases, generar TC1/TC2, enviar RED'\n  });\n}\n\nreturn events.map(e => ({ json: { ...e, tenant_id } }));"
+      },
+      "id": "generate-laboral-events",
+      "name": "Generate Laboral Events",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Mercantil events\nconst { tenant_id, anio } = $json;\n\nreturn [\n  { json: { tenant_id, titulo: 'Legalización Libros', tipo_evento: 'libros_legalizar', categoria: 'mercantil', fecha_limite: `${anio}-04-30T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Generar asientos cierre, legalizar telemáticamente' } },\n  { json: { tenant_id, titulo: 'Depósito Cuentas Anuales', tipo_evento: 'deposito_cuentas', categoria: 'mercantil', fecha_limite: `${anio}-07-31T23:59:59Z`, anio_fiscal: anio, periodo: 'ANUAL', accion_sugerida: 'Preparar balance, PyG, memoria, informe, depositar' } },\n];"
+      },
+      "id": "generate-mercantil-events",
+      "name": "Generate Mercantil Events",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 600]
+    },
+    {
+      "parameters": {
+        "mode": "merge",
+        "options": {}
+      },
+      "id": "merge-events",
+      "name": "Merge All Events",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://gestia-api:8000/internal/n8n/callback/calendar",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { tenant_id: $json.tenant_id, anio: $json.anio, eventos: $json.eventos } }}"
+      },
+      "id": "callback-calendar",
+      "name": "Calendar Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1500, 300],
+      "credentials": {
+        "httpHeaderAuth": "GESTIA Internal API"
+      }
+    }
+  ],
+  "connections": {
+    "Cron Monday 6AM": {
+      "main": [
+        [
+          {
+            "node": "Get Active Tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Tenants": {
+      "main": [
+        [
+          {
+            "node": "Split Tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tenants": {
+      "main": [
+        [
+          {
+            "node": "Generate Fiscal Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Laboral Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Mercantil Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Fiscal Events": {
+      "main": [
+        [
+          {
+            "node": "Merge All Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Laboral Events": {
+      "main": [
+        [
+          {
+            "node": "Merge All Events",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Generate Mercantil Events": {
+      "main": [
+        [
+          {
+            "node": "Merge All Events",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge All Events": {
+      "main": [
+        [
+          {
+            "node": "Calendar Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Callback": {
+      "main": [
+        [
+          {
+            "node": "Split Tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "2"
+}

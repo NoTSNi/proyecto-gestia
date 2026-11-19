@@ -1,0 +1,27 @@
+# Text files
+*.py text
+*.md text
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.sh text
+*.txt text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.whl binary
+
+# Line endings
+* text=auto eol=lf
+
+# Git attributes
+*.py export-ignore
+*.sh export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore

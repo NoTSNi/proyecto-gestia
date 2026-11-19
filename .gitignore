@@ -1,0 +1,116 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment files (SECRETS!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.out
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Build / Dist
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Docker
+docker-compose.override.yml
+
+# MinIO / S3 local data
+minio_data/
+
+# n8n data
+n8n_data/
+
+# PostgreSQL data
+postgres_data/
+
+# Redis data
+redis_data/
+
+# Uploads / Documents (use MinIO/S3)
+uploads/
+documents/
+*.pdf
+*.docx
+*.xlsx
+*.csv
+*.xml
+
+# Certificates / Keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+certs/
+
+# Jupyter / Notebooks
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/
+
+# UV / pip
+uv.lock
+requirements.txt
+requirements-*.txt
+
+# Coverage / Reports
+coverage.xml
+*.lcov
+
+# Profiling
+*.prof
+*.pstats
+
+# Local overrides
+local.py
+local_settings.py
+config.local.py
+
+# IDE specific
+*.swp
+*.swo
+.project
+.pydevproject

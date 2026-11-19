@@ -1,0 +1,158 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gestia-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gestia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-gestia}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-extensions.sql:/docker-entrypoint-initdb.d/init-extensions.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gestia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gestia_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: gestia-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - gestia_net
+
+  localstack:
+    image: localstack/localstack:2.3.0
+    container_name: gestia-localstack
+    environment:
+      SERVICES: s3
+      DEBUG: "1"
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-gestia}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-changeme123}
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - minio_data:/var/lib/localstack
+    ports:
+      - "4566:4566"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gestia_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: gestia-n8n
+    environment:
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      GENERIC_TIMEZONE: Europe/Madrid
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-gestia}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-changeme}
+      N8N_LOG_LEVEL: info
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows:ro
+    ports:
+      - "5678:5678"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gestia_net
+
+  gestia-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gestia-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-gestia}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-gestia}
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: localstack:4566
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-gestia}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-changeme123}
+      MINIO_BUCKET: gestia-documents
+      MINIO_SECURE: "false"
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/gestia
+      N8N_API_KEY: ${N8N_API_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+      ENVIRONMENT: development
+    volumes:
+      - .:/app
+      - ./scripts:/app/scripts:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    networks:
+      - gestia_net
+
+  gestia-web:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+      target: development
+    container_name: gestia-web
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    volumes:
+      - ./web-ui:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - gestia-api
+    networks:
+      - gestia_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  n8n_data:
+
+networks:
+  gestia_net:
+    driver: bridge

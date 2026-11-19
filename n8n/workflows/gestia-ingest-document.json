@@ -1,0 +1,343 @@
+{
+  "name": "gestia-ingest-document",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gestia/ingest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-ingest",
+      "name": "Webhook Ingest",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "gestia-ingest"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Validate input\nconst { document_id, tenant_id, object_key, filename, content_type, source, metadata } = $json;\n\nif (!document_id || !tenant_id || !object_key) {\n  throw new Error('Missing required fields: document_id, tenant_id, object_key');\n}\n\n// Return validated data for next nodes\nreturn [{ json: { document_id, tenant_id, object_key, filename, content_type, source, metadata } }];"
+      },
+      "id": "validate-input",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "bucket": "gestia-quarantine",
+        "operation": "download",
+        "key": "={{$json.object_key}}",
+        "options": {}
+      },
+      "id": "download-from-minio",
+      "name": "Download from MinIO",
+      "type": "n8n-nodes-base.minio",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "credentials": {
+        "minioApi": "MinIO Credentials"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Save file to temp for OCR\nconst fs = require('fs');\nconst path = require('path');\nconst os = require('os');\n\nconst fileBuffer = $json.data;\nconst tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gestia-ocr-'));\nconst ext = path.extname($json.filename) || '.pdf';\nconst tempPath = path.join(tempDir, `doc${ext}`);\n\nfs.writeFileSync(tempPath, fileBuffer);\n\nreturn [{ json: { ...$json, temp_path: tempPath, temp_dir: tempDir } }];"
+      },
+      "id": "save-temp-file",
+      "name": "Save Temp File",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://docling-service:8000/ocr",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { file_path: $json.temp_path, languages: ['es', 'en'] } }}"
+      },
+      "id": "docling-ocr",
+      "name": "Docling OCR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1250, 300],
+      "credentials": {
+        "httpHeaderAuth": "Docling API"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse OCR result\nconst ocrResult = $json;\nconst text = ocrResult.text || '';\nconst confidence = ocrResult.confidence || 0;\nconst metadata = ocrResult.metadata || {};\n\n// Simple classification based on keywords\nconst textLower = text.toLowerCase();\nlet tipo = 'otro';\nlet tipoConfidence = 0.5;\n\nif (textLower.includes('factura') && (textLower.includes('emitida') || textLower.includes('recibida'))) {\n  tipo = textLower.includes('emitida') ? 'factura_emitida' : 'factura_recibida';\n  tipoConfidence = 0.9;\n} else if (textLower.includes('contrato') && textLower.includes('trabajo')) {\n  tipo = 'contrato_laboral';\n  tipoConfidence = 0.85;\n} else if (textLower.includes('escritura') && textLower.includes('pública')) {\n  tipo = 'escritura_publica';\n  tipoConfidence = 0.9;\n} else if (textLower.includes('acta') && textLower.includes('junta')) {\n  tipo = 'acta_junta';\n  tipoConfidence = 0.85;\n} else if (textLower.includes('modelo 303') || textLower.includes('iva')) {\n  tipo = 'modelo_303';\n  tipoConfidence = 0.8;\n} else if (textLower.includes('nómina') || textLower.includes('nomina')) {\n  tipo = 'nomina';\n  tipoConfidence = 0.85;\n}\n\n// Split text into chunks (simple paragraph-based)\nconst paragraphs = text.split('\\n\\n').filter(p => p.trim().length > 50);\nconst chunks = paragraphs.map((p, i) => ({\n  index: i,\n  content: p.trim(),\n  tokens: Math.ceil(p.length / 4),\n  page: metadata.page || 1,\n  section: `paragraph_${i}`\n}));\n\nreturn [{ json: { ...$json, ocr_text: text, ocr_confidence: confidence, ocr_engine: 'docling', classification: { tipo, confidence: tipoConfidence }, chunks, metadatos: metadata } }];"
+      },
+      "id": "process-ocr",
+      "name": "Process OCR + Classify",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-chunks",
+      "name": "Split Chunks",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [1750, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://embedding-service:8000/embed",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { text: $json.content, model: 'text-embedding-3-small' } }}"
+      },
+      "id": "generate-embeddings",
+      "name": "Generate Embeddings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2000, 200],
+      "credentials": {
+        "httpHeaderAuth": "Embedding API"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Prepare chunk for vector DB\nconst chunk = $json;\nreturn [{ json: { ...chunk, embedding: $json.embedding } }];"
+      },
+      "id": "prepare-chunk",
+      "name": "Prepare Chunk",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [2250, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://gestia-api:8000/internal/n8n/callback/chunk",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { document_id: $json.document_id, tenant_id: $json.tenant_id, chunk_index: $json.index, content: $json.content, token_count: $json.tokens, embedding: $json.embedding, page_number: $json.page, section_title: $json.section, metadata: $json.metadata } }}"
+      },
+      "id": "save-chunk-callback",
+      "name": "Save Chunk Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2500, 200],
+      "credentials": {
+        "httpHeaderAuth": "GESTIA Internal API"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Cleanup temp files\nconst fs = require('fs');\nconst path = require('path');\n\nif ($json.temp_dir && fs.existsSync($json.temp_dir)) {\n  fs.rmSync($json.temp_dir, { recursive: true, force: true });\n}\n\nreturn [{ json: $json }];"
+      },
+      "id": "cleanup-temp",
+      "name": "Cleanup Temp",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [2750, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://gestia-api:8000/internal/n8n/callback/ingestion",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { document_id: $json.document_id, tenant_id: $json.tenant_id, status: 'completed', classification: $json.classification, ocr_text: $json.ocr_text, ocr_confidence: $json.ocr_confidence, ocr_engine: $json.ocr_engine, chunks_count: $json.chunks.length, metadatos: $json.metadatos } }}"
+      },
+      "id": "final-callback",
+      "name": "Final Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [3000, 300],
+      "credentials": {
+        "httpHeaderAuth": "GESTIA Internal API"
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 200,
+        "responseHeaders": {},
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { status: 'accepted', document_id: $json.document_id, message: 'Document queued for processing' } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [500, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 500,
+        "responseHeaders": {},
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ { status: 'error', message: $json.error?.message || 'Processing failed' } }}"
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [3250, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Ingest": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Download from MinIO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download from MinIO": {
+      "main": [
+        [
+          {
+            "node": "Save Temp File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Temp File": {
+      "main": [
+        [
+          {
+            "node": "Docling OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Docling OCR": {
+      "main": [
+        [
+          {
+            "node": "Process OCR + Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process OCR + Classify": {
+      "main": [
+        [
+          {
+            "node": "Split Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Chunks": {
+      "main": [
+        [
+          {
+            "node": "Generate Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Prepare Chunk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Chunk": {
+      "main": [
+        [
+          {
+            "node": "Save Chunk Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chunk Callback": {
+      "main": [
+        [
+          {
+            "node": "Split Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Chunks": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup Temp": {
+      "main": [
+        [
+          {
+            "node": "Final Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "1"
+}
