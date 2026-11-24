@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es" hx-ext="response-targets">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GESTIA - Gestoría Inteligente{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar { transition: transform 0.3s ease; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+        }
+        .htmx-indicator { opacity: 0; transition: opacity 200ms; }
+        .htmx-request .htmx-indicator { opacity: 1; }
+        .htmx-request.htmx-indicator { opacity: 1; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% block sidebar %}
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg sidebar transform lg:translate-x-0">
+        <div class="flex flex-col h-full">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-200">
+                <a href="/" class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">GESTIA</span>
+                </a>
+                <p class="text-xs text-gray-500 mt-1">Gestoría Inteligente</p>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                {% block nav_items %}{% endblock %}
+            </nav>
+            
+            <!-- User info -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span class="text-sm font-medium text-gray-600">{{ user_initials }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ user_name }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ user_role }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    {% endblock %}
+    
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black/50 hidden lg:hidden" hx-on:click="document.getElementById('sidebar').classList.remove('open'); this.classList.add('hidden')"></div>
+    
+    <!-- Main content -->
+    <main class="lg:ml-64 min-h-screen">
+        <!-- Top bar -->
+        <header class="sticky top-0 z-30 bg-white border-b border-gray-200">
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="flex items-center space-x-4">
+                    <button 
+                        id="sidebar-toggle" 
+                        class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+                        onclick="document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.remove('hidden')"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h1 class="text-lg font-semibold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% block header_actions %}{% endblock %}
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page content -->
+        <div class="p-6">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    {% block scripts %}
+    <script>
+        // Global HTMX config
+        document.body.addEventListener('htmx:configRequest', (evt) => {
+            evt.detail.headers['X-Requested-With'] = 'XMLHttpRequest';
+        });
+        
+        // Flash messages
+        document.body.addEventListener('htmx:afterSwap', (evt) => {
+            if (evt.detail.target.id === 'flash-messages') {
+                setTimeout(() => {
+                    const alerts = evt.detail.target.querySelectorAll('.alert-auto-dismiss');
+                    alerts.forEach(alert => alert.remove());
+                }, 5000);
+            }
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>
