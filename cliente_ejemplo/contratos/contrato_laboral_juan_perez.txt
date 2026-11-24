@@ -1,0 +1,50 @@
+CONTRATO DE TRABAJO INDEFINIDO
+------------------------------------------------
+EMPRESA: Empresa Demo SL
+NIF: B12345678
+DOMICILIO: Calle Mayor 123, 28001 Madrid
+CIF: B12345678
+CCC: 28/123456/78
+
+TRABAJADOR: Juan Pérez García
+DNI: 12345678Z
+NAF: 28/123456789
+DOMICILIO: Av. de la Paz 45, 28002 Madrid
+FECHA NACIMIENTO: 15/03/1985
+
+DATOS DEL CONTRATO:
+-------------------
+Tipo: Indefinido a tiempo completo
+Código contrato: 100
+Categoría profesional: Grupo 2 - Técnico contable
+Convenio colectivo: Convenio Oficinas y Despachos Madrid
+Fecha inicio: 01/02/2025
+Fecha fin: Indefinido
+Periodo prueba: 2 meses (conforme convenio)
+
+JORNADA Y HORARIO:
+------------------
+Jornada: 40 horas semanales
+Horario: Lunes a Viernes 09:00-14:00 / 16:00-19:00
+Descanso semanal: Sábado y Domingo
+Vacaciones: 22 días laborables/año
+
+RETRIBUCIÓN:
+------------
+Salario base mensual: 2.100,00 €
+Plus convenio: 150,00 €
+Plus transporte: 100,00 €
+Pagas extraordinarias: 2 al año (Julio y Diciembre)
+Total bruto anual: 31.200,00 €
+
+COTIZACIÓN SEGURIDAD SOCIAL:
+-----------------------------
+Grupo cotización: 2
+Base mensual: 2.350,00 €
+Empresa: 31,98% (Contingencias comunes) + 6,70% (Desempleo) + 0,20% (FOGASA) + 0,60% (Formación)
+Trabajador: 6,35% (Comunes) + 1,55% (Desempleo) + 0,10% (Formación)
+
+FIRMAS:
+-------
+Empresa: _________________        Trabajador: _________________
+Fecha: 01/02/2025                  Fecha: 01/02/2025

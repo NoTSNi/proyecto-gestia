@@ -1,0 +1,100 @@
+{
+  "cliente_ejemplo": {
+    "empresa": {
+      "nombre": "Tech Solutions SL",
+      "nif": "B87654321",
+      "domicilio": "Calle Innovación 10, 28050 Madrid",
+      "constitucion": "15/01/2025",
+      "capital_social": 10000,
+      "objeto_social": "Desarrollo de software, consultoría IT, servicios cloud"
+    },
+    "socios": [
+      {"nombre": "Carlos García López", "dni": "11111111A", "participacion": 40},
+      {"nombre": "María Fernández Ruiz", "dni": "22222222B", "participacion": 35},
+      {"nombre": "Pedro Sánchez Gómez", "dni": "33333333C", "participacion": 25}
+    ],
+    "trabajadores": [
+      {
+        "nombre": "Juan Pérez García",
+        "nif": "12345678Z",
+        "naf": "28/123456789",
+        "categoria": "Grupo 2 - Técnico contable",
+        "contrato": "Indefinido",
+        "fecha_alta": "01/02/2025",
+        "salario_base": 2100,
+        "plus_convenio": 150,
+        "plus_transporte": 100
+      }
+    ],
+    "documentos": {
+      "facturas_emitidas": [
+        {
+          "archivo": "facturas/factura_emitida_001.txt",
+          "numero": "F-2025-001",
+          "fecha": "15/01/2025",
+          "cliente": "Empresa Demo SL",
+          "base": 650,
+          "iva": 136.5,
+          "total": 786.5
+        }
+      ],
+      "facturas_recibidas": [
+        {
+          "archivo": "facturas/factura_recibida_001.txt",
+          "numero": "FR-2025-0045",
+          "fecha": "10/01/2025",
+          "proveedor": "Telefónica España SAU",
+          "base": 97.8,
+          "iva": 20.54,
+          "total": 118.34
+        }
+      ],
+      "contratos": [
+        {
+          "archivo": "contratos/contrato_laboral_juan_perez.txt",
+          "tipo": "Indefinido",
+          "trabajador": "Juan Pérez García",
+          "categoria": "Grupo 2 - Técnico contable",
+          "salario_bruto_anual": 31200
+        }
+      ],
+      "escrituras_mercantiles": [
+        {
+          "archivo": "escrituras/escritura_constitucion_tech_solutions.txt",
+          "tipo": "Constitución",
+          "fecha": "15/01/2025",
+          "notario": "D. Carlos Ruiz Martín",
+          "capital": 10000
+        }
+      ],
+      "escritos_administrativos": [
+        {
+          "archivo": "escritos_administrativos/recurso_reposicion_subvencion.txt",
+          "tipo": "Recurso de reposición",
+          "organo": "Consejería Economía Madrid",
+          "expediente": "SUBV-2024-004567",
+          "importe": 9250
+        }
+      ],
+      "nominas": [
+        {
+          "archivo": "nominas/nomina_enero_2025_juan_perez.txt",
+          "periodo": "ENE-2025",
+          "trabajador": "Juan Pérez García",
+          "bruto": 2350,
+          "neto": 1880,
+          "coste_empresa": 2817.65
+        }
+      ],
+      "contabilidad": [
+        {
+          "archivo": "documentos_varios/libro_diario_enero_2025.txt",
+          "tipo": "Libro diario",
+          "periodo": "ENE-2025",
+          "total_debe": 32205.15,
+          "total_haber": 32205.15
+        }
+      ]
+    }
+  }
+}

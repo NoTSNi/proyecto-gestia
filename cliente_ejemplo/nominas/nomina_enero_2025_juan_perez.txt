@@ -1,0 +1,53 @@
+NÓMINA ENERO 2025
+===================
+EMPRESA: Tech Solutions SL
+NIF: B87654321
+CCC: 28/123456/78
+Dirección: Calle Innovación 10, 28050 Madrid
+
+TRABAJADOR: Juan Pérez García
+NIF: 12345678Z
+NAF: 28/123456789
+Categoría: Grupo 2 - Técnico contable
+Contrato: Indefinido (100)
+Fecha alta: 01/02/2025
+Antigüedad: 0 años
+
+DEVENGOS:
+---------
+Salario base:                    2.100,00 €
+Plus convenio:                     150,00 €
+Plus transporte:                   100,00 €
+----------------------------------------
+TOTAL DEVENGOS:                2.350,00 €
+
+DEDUCCIONES:
+------------
+Seguridad Social (6,35% + 1,55% + 0,10%):   188,00 €
+IRPF (retención 12%):                        282,00 €
+----------------------------------------
+TOTAL DEDUCCIONES:                  470,00 €
+
+LIQUIDO A PERCIBIR:                 1.880,00 €
+
+DATOS PARA TC1/TC2:
+-------------------
+Base contingencias comunes:     2.350,00 €
+Base contingencias profesionales: 2.350,00 €
+Base desempleo:                 2.350,00 €
+Base formación:                 2.350,00 €
+
+COSTE EMPRESA:
+--------------
+Seguridad Social (31,98% + 6,70% + 0,20% + 0,60%):  937,65 €
+Salario neto:                                       1.880,00 €
+---------------------------------------------------
+COSTE TOTAL MES:                                 2.817,65 €
+
+PAGAS EXTRAORDINARIAS:
+----------------------
+Próxima paga (Julio): 2.350,00 € brutos
+Acumulado provision:   391,67 €/mes
+
+FIRMA TRABAJADOR: ___________________
+FECHA: 31/01/2025

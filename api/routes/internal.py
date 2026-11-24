@@ -32,6 +32,18 @@ class N8NIngestionCallback(BaseModel):
     error: str | None = None
 
 
+class N8NChunkCallback(BaseModel):
+    document_id: str
+    tenant_id: str
+    chunk_index: int
+    content: str
+    token_count: int
+    embedding: list[float] | None = None
+    page_number: int | None = None
+    section_title: str | None = None
+    metadata: dict = {}
+
+
 class N8NCalendarCallback(BaseModel):
     tenant_id: str
     anio: int
@@ -100,6 +112,44 @@ async def n8n_ingestion_callback(
 
     await db.commit()
     return {"status": "ok", "chunks_saved": len(payload.chunks)}
+
+
+# --------------------------------------------
+# CHUNK CALLBACK (for streaming chunk processing)
+# --------------------------------------------
+
+@router.post("/callback/chunk", status_code=status.HTTP_200_OK, summary="n8n chunk callback")
+async def n8n_chunk_callback(
+    payload: N8NChunkCallback,
+    db: AsyncSession = Depends(get_db),
+):
+    """Callback from n8n for each chunk processed."""
+    # Verify document exists and belongs to tenant
+    result = await db.execute(
+        select(Documento).where(Documento.id == payload.document_id, Documento.tenant_id == payload.tenant_id)
+    )
+    doc = result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    chunk = ChunkDocumento(
+        tenant_id=payload.tenant_id,
+        documento_id=payload.document_id,
+        chunk_index=payload.chunk_index,
+        content=payload.content,
+        token_count=payload.token_count,
+        embedding=payload.embedding,
+        page_number=payload.page_number,
+        section_title=payload.section_title,
+        metadata_json=payload.metadata,
+    )
+    db.add(chunk)
+
+    # Increment chunks_count on document
+    doc.chunks_count = (doc.chunks_count or 0) + 1
+
+    await db.commit()
+    return {"status": "ok", "chunk_index": payload.chunk_index}
 
 
 # --------------------------------------------

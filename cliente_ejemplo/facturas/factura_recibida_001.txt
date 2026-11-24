@@ -1,0 +1,20 @@
+FACTURA RECIBIDA
+Número: FR-2025-0045
+Fecha: 10/01/2025
+Proveedor: Telefónica España SAU
+NIF: A28015895
+Dirección: Gran Vía 28, 28013 Madrid
+
+CONCEPTO                    IMPORTE
+------------------------------------
+Línea móvil empresa (ENE)    45,90
+Fibra óptica 600Mb           39,90
+Mantenimiento equipos         12,00
+------------------------------------
+BASE IMPONIBLE:                                        97,80
+IVA (21%):                                             20,54
+RETENCIÓN IRPF (0%):                                    0,00
+TOTAL:                                                 118,34
+
+Vencimiento: 25/01/2025
+Domiciliación: ES66 0081 0000 0000 0123 4567

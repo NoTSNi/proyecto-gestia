@@ -93,6 +93,40 @@ services:
     networks:
       - gestia_net
 
+  docling-ocr:
+    build:
+      context: ./services/docling_ocr
+      dockerfile: Dockerfile
+    container_name: gestia-docling-ocr
+    environment:
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8001:8000"
+    networks:
+      - gestia_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  embedding-service:
+    build:
+      context: ./services/embedding
+      dockerfile: Dockerfile
+    container_name: gestia-embedding
+    environment:
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8002:8000"
+    networks:
+      - gestia_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   gestia-api:
     build:
       context: .
