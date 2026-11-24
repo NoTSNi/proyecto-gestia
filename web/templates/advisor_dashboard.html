@@ -3,39 +3,40 @@
 {% block title %}Dashboard Asesor - GESTIA{% endblock %}
 
 {% block nav_items %}
-<a href="/advisor/dashboard" class="flex items-center space-x-3 px-3 py-2.5 text-blue-600 bg-blue-50 rounded-lg font-medium">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+<a href="/advisor/dashboard" class="flex items-center space-x-3 px-3 py-2.5 text-brand-400 bg-brand-600/10 rounded-lg font-medium border border-brand-600/20" aria-current="page">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
     <span>Dashboard</span>
 </a>
 
-<a href="/advisor/clientes" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+<a href="/advisor/clientes" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
     <span>Clientes</span>
+    <span class="ml-auto px-2 py-0.5 bg-brand-600/20 border border-brand-600/30 text-brand-400 text-xs font-medium rounded-pill">24</span>
 </a>
 
-<a href="/advisor/tareas" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+<a href="/advisor/tareas" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
     <span>Tareas</span>
-    <span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">12</span>
+    <span class="ml-auto px-2 py-0.5 bg-danger-500/20 border border-danger-500/30 text-danger-500 text-xs font-medium rounded-pill">12</span>
 </a>
 
-<a href="/advisor/documentos" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<a href="/advisor/documentos" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
     <span>Documentos</span>
 </a>
 
-<a href="/advisor/calendario" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+<a href="/advisor/calendario" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
     <span>Calendario</span>
 </a>
 
-<a href="/advisor/comunicaciones" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h4M8 12l2-2m0 0l2 2m-2-2v8m-6 0v8m10-8v8m0-8h-4M8 12l-2 2m0 0l2 2m-2-2v8"></path></svg>
+<a href="/advisor/comunicaciones" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h4M8 12l2-2m0 0l2 2m-2-2v8m-6 0v8m10-8v8m0-8h-4M8 12l-2 2m0 0l2 2m-2-2v8"></path></svg>
     <span>Comunicaciones</span>
 </a>
 
-<a href="/advisor/reportes" class="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<a href="/advisor/reportes" class="flex items-center space-x-3 px-3 py-2.5 text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 rounded-lg transition-colors duration-200 group">
+    <svg class="w-5 h-5 group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
     <span>Reportes</span>
 </a>
 {% endblock %}
@@ -47,424 +48,385 @@
 {% block user_role %}Asesora Senior{% endblock %}
 
 {% block header_actions %}
-<div class="hidden sm:flex items-center space-x-2">
-    <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white" id="client-select" hx-get="/advisor/api/clients" hx-trigger="load" hx-target="this">
+<!-- Client Selector -->
+<div class="hidden lg:block">
+    <select id="client-select" class="w-56 px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238a8f98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-right-2.5 bg-no-repeat pr-8" aria-label="Seleccionar cliente" hx-get="/api/clients" hx-trigger="load" hx-target="this">
         <option value="">Seleccionar cliente...</option>
     </select>
 </div>
-<button class="p-2 rounded-lg text-gray-500 hover:bg-gray-100" title="Notificaciones">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+
+<!-- Period Selector -->
+<div class="hidden lg:block">
+    <select id="period-select" class="px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238a8f98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-right-2.5 bg-no-repeat pr-8" aria-label="Seleccionar período">
+        <option value="month">Este mes</option>
+        <option value="quarter">Este trimestre</option>
+        <option value="year">Este año</option>
+    </select>
+</div>
+
+<!-- New Client Button -->
+<button class="hidden lg:flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg shadow-brand-600/30 group">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+    <span>Nuevo cliente</span>
+</button>
+
+<!-- Notifications -->
+<button class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors relative" aria-label="Notificaciones">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+    <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger-500 text-[10px] font-semibold rounded-full flex items-center justify-center animate-pulse-subtle">3</span>
 </button>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-6 animate-fade-in">
     <!-- Flash messages -->
     <div id="flash-messages" class="fixed top-20 right-4 z-50 w-80 space-y-2" hx-ext="response-targets"></div>
     
-    <!-- Header con stats globales -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center justify-between mb-6">
+    <!-- Header con Stats Globales -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6 lg:p-8 animate-slide-in">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900">Panel de control</h2>
-                <p class="text-gray-500 mt-1">Visión global de tu cartera de clientes</p>
+                <p class="text-xs font-medium text-brand-400 tracking-widest uppercase mb-1">Panel de control</p>
+                <h2 class="text-3xl lg:text-4xl font-semibold tracking-tight text-text-primary">Panel de control</h2>
+                <p class="text-text-tertiary mt-1 text-sm lg:text-base">Visión global de tu cartera de clientes</p>
             </div>
-            <div class="flex items-center space-x-3">
-                <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm" id="period-select">
+            <div class="flex flex-wrap items-center gap-3">
+                <select id="period-select-mobile" class="px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238a8f98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-right-2.5 bg-no-repeat pr-8 lg:hidden" aria-label="Seleccionar período">
                     <option value="month">Este mes</option>
                     <option value="quarter">Este trimestre</option>
                     <option value="year">Este año</option>
                 </select>
-                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                    <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Nuevo cliente
+                <button class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg shadow-brand-600/30 flex items-center gap-2 group">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Nuevo cliente</span>
                 </button>
             </div>
         </div>
         
         <!-- Global KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p class="text-sm text-blue-700">Clientes activos</p>
-                <p class="text-3xl font-bold text-blue-900 mt-1">24</p>
-                <p class="text-xs text-blue-600 mt-1">+2 vs mes anterior</p>
-            </div>
-            <div class="bg-green-50 rounded-xl p-4 border border-green-100">
-                <p class="text-sm text-green-700">Facturación mensual</p>
-                <p class="text-3xl font-bold text-green-900 mt-1">187.500€</p>
-                <p class="text-xs text-green-600 mt-1">+12% vs mes anterior</p>
-            </div>
-            <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
-                <p class="text-sm text-yellow-700">Tareas pendientes</p>
-                <p class="text-3xl font-bold text-yellow-900 mt-1">47</p>
-                <p class="text-xs text-yellow-600 mt-1">12 urgentes</p>
-            </div>
-            <div class="bg-purple-50 rounded-xl p-4 border border-purple-100">
-                <p class="text-sm text-purple-700">Declaraciones mes</p>
-                <p class="text-3xl font-bold text-purple-900 mt-1">38</p>
-                <p class="text-xs text-purple-600 mt-1">303: 12 • 111: 8 • 200: 5</p>
-            </div>
-            <div class="bg-red-50 rounded-xl p-4 border border-red-100">
-                <p class="text-sm text-red-700">Alertas críticas</p>
-                <p class="text-3xl font-bold text-red-900 mt-1">3</p>
-                <p class="text-xs text-red-600 mt-1">Vencimientos < 5 días</p>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <article class="group bg-surface-900/50 border border-border-subtle rounded-xl p-5 hover:border-border hover:shadow-card-hover transition-all duration-300">
+                <p class="text-xs font-medium text-text-quaternary tracking-wider uppercase mb-2">Clientes activos</p>
+                <p class="text-3xl font-semibold tracking-tight text-text-primary">24</p>
+                <p class="text-xs text-success-500 mt-1 flex items-center gap-1">+2 vs mes anterior</p>
+            </article>
+            <article class="group bg-surface-900/50 border border-border-subtle rounded-xl p-5 hover:border-border hover:shadow-card-hover transition-all duration-300">
+                <p class="text-xs font-medium text-text-quaternary tracking-wider uppercase mb-2">Facturación mensual</p>
+                <p class="text-3xl font-semibold tracking-tight text-text-primary">187.500 <span class="text-lg font-normal text-text-tertiary">€</span></p>
+                <p class="text-xs text-success-500 mt-1 flex items-center gap-1">+12% vs mes anterior</p>
+            </article>
+            <article class="group bg-surface-900/50 border border-border-subtle rounded-xl p-5 hover:border-border hover:shadow-card-hover transition-all duration-300">
+                <p class="text-xs font-medium text-text-quaternary tracking-wider uppercase mb-2">Tareas pendientes</p>
+                <p class="text-3xl font-semibold tracking-tight text-text-primary">47</p>
+                <p class="text-xs text-danger-500 mt-1 flex items-center gap-1">12 urgentes</p>
+            </article>
+            <article class="group bg-surface-900/50 border border-border-subtle rounded-xl p-5 hover:border-border hover:shadow-card-hover transition-all duration-300">
+                <p class="text-xs font-medium text-text-quaternary tracking-wider uppercase mb-2">Declaraciones mes</p>
+                <p class="text-3xl font-semibold tracking-tight text-text-primary">38</p>
+                <p class="text-xs text-text-tertiary mt-1">303: 12 • 111: 8 • 200: 5</p>
+            </article>
+            <article class="group bg-surface-900/50 border border-border-subtle rounded-xl p-5 hover:border-border hover:shadow-card-hover transition-all duration-300">
+                <p class="text-xs font-medium text-text-quaternary tracking-wider uppercase mb-2">Alertas críticas</p>
+                <p class="text-3xl font-semibold tracking-tight text-text-primary">3</p>
+                <p class="text-xs text-danger-500 mt-1 flex items-center gap-1">Vencimientos < 5 días</p>
+            </article>
         </div>
-    </div>
+    </section>
     
-    <!-- Main grid -->
+    <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left: Clientes con alertas + Tareas -->
+        <!-- Left: Clientes + Tareas -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Clientes con estado -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="font-semibold text-gray-900">Clientes - Estado fiscal/laboral</h3>
-                    <div class="flex items-center space-x-2">
-                        <input type="text" placeholder="Buscar cliente..." class="px-3 py-2 border border-gray-200 rounded-lg text-sm w-48">
-                        <select class="px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                            <option>Todos</option>
-                            <option>Con alertas</option>
-                            <option>Al día</option>
+            <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden animate-fade-in">
+                <header class="px-6 py-4 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 class="font-semibold text-text-primary">Clientes - Estado Fiscal/Laboral</h3>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-quaternary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <input type="text" placeholder="Buscar cliente..." class="w-56 sm:w-72 pl-10 pr-4 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 text-sm" aria-label="Buscar cliente">
+                        </div>
+                        <select class="px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238a8f98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-right-2.5 bg-no-repeat pr-8" aria-label="Filtrar por estado">
+                            <option value="all">Todos</option>
+                            <option value="alerts">Con alertas</option>
+                            <option value="ok">Al día</option>
                         </select>
                     </div>
-                </div>
+                </header>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
+                    <table class="w-full" role="table">
+                        <thead class="bg-surface-800/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIF</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IVA</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IRPF</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SS</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IS</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mercantil</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">NIF</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">IVA</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">IRPF</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">SS</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">IS</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">Mercantil</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr class="hover:bg-gray-50">
+                        <tbody class="divide-y divide-border-subtle">
+                            <tr class="hover:bg-surface-800/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">Tech Solutions SL</div>
-                                    <div class="text-sm text-gray-500">Juan Pérez (Contacto)</div>
+                                    <div class="font-medium text-text-primary">Tech Solutions SL</div>
+                                    <div class="text-sm text-text-tertiary">Juan Pérez (Contacto)</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">B87654321</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">En prep.</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pendiente</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-gray-50 text-gray-700 text-xs font-medium rounded-full">—</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Al día</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver</button>
-                                </td>
+                                <td class="px-6 py-4 text-sm text-text-tertiary">B87654321</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-brand-500/20 border border-brand-500/30 text-brand-400 text-xs font-medium rounded-pill">En prep.</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pendiente</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-surface-700 border border-border text-text-tertiary text-xs font-medium rounded-pill">—</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Al día</span></td>
+                                <td class="px-6 py-4"><button class="text-brand-400 hover:text-brand-300 text-sm font-medium">Ver</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-surface-800/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">Comercial Norte SA</div>
-                                    <div class="text-sm text-gray-500">María López (Contacto)</div>
+                                    <div class="font-medium text-text-primary">Comercial Norte SA</div>
+                                    <div class="text-sm text-text-tertiary">María López (Contacto)</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">A12345678</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full">URGENTE</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pendiente</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full">Retraso</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pend. dep.</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full">Estatutos</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button class="text-red-600 hover:text-red-700 text-sm font-medium">Ver</button>
-                                </td>
+                                <td class="px-6 py-4 text-sm text-text-tertiary">A12345678</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-500 text-xs font-medium rounded-pill">URGENTE</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pendiente</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-500 text-xs font-medium rounded-pill">Retraso</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pend. dep.</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-500 text-xs font-medium rounded-pill">Estatutos</span></td>
+                                <td class="px-6 py-4"><button class="text-danger-500 hover:text-danger-400 text-sm font-medium">Ver</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-surface-800/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">Inmobiliaria Sur SL</div>
-                                    <div class="text-sm text-gray-500">Carlos Ruiz (Contacto)</div>
+                                    <div class="font-medium text-text-primary">Inmobiliaria Sur SL</div>
+                                    <div class="text-sm text-text-tertiary">Carlos Ruiz (Contacto)</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">B98765432</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Al día</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver</button>
-                                </td>
+                                <td class="px-6 py-4 text-sm text-text-tertiary">B98765432</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Al día</span></td>
+                                <td class="px-6 py-4"><button class="text-brand-400 hover:text-brand-300 text-sm font-medium">Ver</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-surface-800/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">Hostelería Este SL</div>
-                                    <div class="text-sm text-gray-500">Ana Martín (Contacto)</div>
+                                    <div class="font-medium text-text-primary">Hostelería Este SL</div>
+                                    <div class="text-sm text-text-tertiary">Ana Martín (Contacto)</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">B55555555</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pendiente</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pendiente</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-gray-50 text-gray-700 text-xs font-medium rounded-full">—</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Licencia</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver</button>
-                                </td>
+                                <td class="px-6 py-4 text-sm text-text-tertiary">B55555555</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pendiente</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pendiente</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-surface-700 border border-border text-text-tertiary text-xs font-medium rounded-pill">—</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Licencia</span></td>
+                                <td class="px-6 py-4"><button class="text-brand-400 hover:text-brand-300 text-sm font-medium">Ver</button></td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-surface-800/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">Constructora Oeste SA</div>
-                                    <div class="text-sm text-gray-500">Pedro Sánchez (Contacto)</div>
+                                    <div class="font-medium text-text-primary">Constructora Oeste SA</div>
+                                    <div class="text-sm text-text-tertiary">Pedro Sánchez (Contacto)</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">A99999999</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">Pendiente</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Presentado</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">Obra mayor</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">Ver</button>
-                                </td>
+                                <td class="px-6 py-4 text-sm text-text-tertiary">A99999999</td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">Pendiente</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Presentado</span></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 bg-brand-500/20 border border-brand-500/30 text-brand-400 text-xs font-medium rounded-pill">Obra mayor</span></td>
+                                <td class="px-6 py-4"><button class="text-brand-400 hover:text-brand-300 text-sm font-medium">Ver</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </section>
             
-            <!-- Tareas urgentes -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="font-semibold text-gray-900">Tareas urgentes (próximos 7 días)</h3>
-                    <a href="/advisor/tareas" class="text-sm text-blue-600 hover:text-blue-700">Ver todas →</a>
+            <!-- Tareas Urgentes -->
+            <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden animate-fade-in">
+                <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+                    <h3 class="font-semibold text-text-primary">Tareas Urgentes (próximos 7 días)</h3>
+                    <a href="/advisor/tareas" class="text-sm font-medium text-brand-400 hover:text-brand-300">Ver todas →</a>
+                </header>
+                <div class="divide-y divide-border-subtle">
+                    <article class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="w-10 h-10 rounded-lg bg-danger-500/20 border border-danger-500/30 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-text-primary truncate group-hover:text-brand-400 transition-colors">Modelo 303 - Comercial Norte SA</p>
+                                <p class="text-sm text-text-tertiary truncate">Vence 20/04 • IVA Q1 2025</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 flex-shrink-0">
+                            <span class="px-2 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-500 text-xs font-medium rounded-pill">2 días</span>
+                            <button class="px-3 py-1 bg-danger-500 hover:bg-danger-600 text-white text-sm rounded-lg transition-colors duration-200 font-medium">Presentar</button>
+                        </div>
+                    </article>
+                    <article class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="w-10 h-10 rounded-lg bg-danger-500/20 border border-danger-500/30 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-text-primary truncate group-hover:text-brand-400 transition-colors">TC1/TC2 - Tech Solutions SL</p>
+                                <p class="text-sm text-text-tertiary truncate">Vence 30/04 • Marzo 2025</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 flex-shrink-0">
+                            <span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">5 días</span>
+                            <button class="px-3 py-1 bg-warning-500 hover:bg-warning-600 text-white text-sm rounded-lg transition-colors duration-200 font-medium">Generar</button>
+                        </div>
+                    </article>
+                    <article class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="w-10 h-10 rounded-lg bg-warning-500/20 border border-warning-500/30 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-text-primary truncate group-hover:text-brand-400 transition-colors">Depósito cuentas - Inmobiliaria Sur</p>
+                                <p class="text-sm text-text-tertiary truncate">Vence 30/07 • Ejercicio 2024</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 flex-shrink-0">
+                            <span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">45 días</span>
+                            <button class="px-3 py-1 bg-warning-500 hover:bg-warning-600 text-white text-sm rounded-lg transition-colors duration-200 font-medium">Preparar</button>
+                        </div>
+                    </article>
+                    <article class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center space-x-4 min-w-0">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-text-primary truncate group-hover:text-brand-400 transition-colors">Nómina abril - Hostelería Este</p>
+                                <p class="text-sm text-text-tertiary truncate">Calcular y generar recibos</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 flex-shrink-0">
+                            <span class="px-2 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium rounded-pill">Esta semana</span>
+                            <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors duration-200 font-medium">Calcular</button>
+                        </div>
+                    </article>
                 </div>
-                <div class="divide-y divide-gray-100">
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Modelo 303 - Comercial Norte SA</p>
-                                <p class="text-sm text-gray-500">Vence 20/04 • IVA Q1 2025</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full">2 días</span>
-                            <button class="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">Presentar</button>
-                        </div>
-                    </div>
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">TC1/TC2 - Tech Solutions SL</p>
-                                <p class="text-sm text-gray-500">Vence 30/04 • Marzo 2025</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="px-2 py-1 bg-orange-50 text-orange-700 text-xs font-medium rounded-full">5 días</span>
-                            <button class="px-3 py-1 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700">Generar</button>
-                        </div>
-                    </div>
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Depósito cuentas - Inmobiliaria Sur</p>
-                                <p class="text-sm text-gray-500">Vence 30/07 • Ejercicio 2024</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">45 días</span>
-                            <button class="px-3 py-1 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700">Preparar</button>
-                        </div>
-                    </div>
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Nómina abril - Hostelería Este</p>
-                                <p class="text-sm text-gray-500">Calcular y generar recibos</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">Esta semana</span>
-                            <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">Calcular</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
         
-        <!-- Right: Resumen + Acciones rápidas -->
+        <!-- Right: Resumen + Acciones -->
         <div class="space-y-6">
-            <!-- Resumen carga trabajo -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100">
-                    <h3 class="font-semibold text-gray-900">Carga de trabajo</h3>
+            <!-- Resumen Carga Trabajo -->
+            <section class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 animate-fade-in">
+                <h3 class="font-semibold text-text-primary mb-4">Carga de Trabajo</h3>
+                <div class="space-y-4">
+                    <article>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-text-tertiary">Declaraciones fiscales</span>
+                            <span class="font-medium text-brand-400">12/38</span>
+                        </div>
+                        <div class="w-full bg-surface-800/50 rounded-full h-2 overflow-hidden">
+                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-500" style="width: 32%"></div>
+                        </div>
+                    </article>
+                    <article>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-text-tertiary">Nóminas mensuales</span>
+                            <span class="font-medium text-success-500">8/24</span>
+                        </div>
+                        <div class="w-full bg-surface-800/50 rounded-full h-2 overflow-hidden">
+                            <div class="bg-success-500 h-2 rounded-full transition-all duration-500" style="width: 33%"></div>
+                        </div>
+                    </article>
+                    <article>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-text-tertiary">Trámites mercantiles</span>
+                            <span class="font-medium text-purple-400">3/7</span>
+                        </div>
+                        <div class="w-full bg-surface-800/50 rounded-full h-2 overflow-hidden">
+                            <div class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="width: 43%"></div>
+                        </div>
+                    </article>
+                    <article>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-text-tertiary">Gestiones administrativas</span>
+                            <span class="font-medium text-warning-500">5/12</span>
+                        </div>
+                        <div class="w-full bg-surface-800/50 rounded-full h-2 overflow-hidden">
+                            <div class="bg-warning-500 h-2 rounded-full transition-all duration-500" style="width: 42%"></div>
+                        </div>
+                    </article>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Declaraciones fiscales</span>
-                            <span class="font-medium text-blue-600">12/38</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width: 32%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Nóminas mensuales</span>
-                            <span class="font-medium text-green-600">8/24</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: 33%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Trámites mercantiles</span>
-                            <span class="font-medium text-purple-600">3/7</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-purple-500 h-2 rounded-full" style="width: 43%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-600">Gestiones administrativas</span>
-                            <span class="font-medium text-orange-600">5/12</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-orange-500 h-2 rounded-full" style="width: 42%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
             
-            <!-- Acciones rápidas -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-semibold text-gray-900 mb-4">Acciones rápidas</h3>
+            <!-- Acciones Rápidas -->
+            <section class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 animate-fade-in">
+                <h3 class="font-semibold text-text-primary mb-4">Acciones Rápidas</h3>
                 <div class="space-y-2">
-                    <button class="w-full p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                    <button class="group w-full p-4 border border-border-subtle rounded-xl hover:border-border hover:bg-surface-800/30 hover:shadow-card-hover transition-all duration-300 flex items-center space-x-3 text-left">
+                        <div class="w-10 h-10 rounded-lg bg-brand-500/20 border border-brand-500/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-5 h-5 text-brand-400 group-hover:text-brand-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                         </div>
-                        <div>
-                            <p class="font-medium text-gray-900">Nuevo cliente</p>
-                            <p class="text-sm text-gray-500">Alta completa con todos los datos</p>
-                        </div>
-                    </button>
-                    <button class="w-full p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-900">Subir documentos lote</p>
-                            <p class="text-sm text-gray-500">Procesar múltiples facturas/contratos</p>
+                        <div class="flex-1">
+                            <p class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Nuevo cliente</p>
+                            <p class="text-sm text-text-tertiary">Alta completa con todos los datos</p>
                         </div>
                     </button>
-                    <button class="w-full p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <button class="group w-full p-4 border border-border-subtle rounded-xl hover:border-border hover:bg-surface-800/30 hover:shadow-card-hover transition-all duration-300 flex items-center space-x-3 text-left">
+                        <div class="w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-5 h-5 text-green-400 group-hover:text-green-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         </div>
-                        <div>
-                            <p class="font-medium text-gray-900">Generar modelos masivo</p>
-                            <p class="text-sm text-gray-500">303, 111, 190, 200 para todos</p>
+                        <div class="flex-1">
+                            <p class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Subir documentos lote</p>
+                            <p class="text-sm text-text-tertiary">Procesar múltiples facturas/contratos</p>
                         </div>
                     </button>
-                    <button class="w-full p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h4M8 12l2-2m0 0l2 2m-2-2v8m-6 0v8m10-8v8m0-8h-4M8 12l-2 2m0 0l2 2m-2-2v8"></path></svg>
+                    <button class="group w-full p-4 border border-border-subtle rounded-xl hover:border-border hover:bg-surface-800/30 hover:shadow-card-hover transition-all duration-300 flex items-center space-x-3 text-left">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
-                        <div>
-                            <p class="font-medium text-gray-900">Enviar recordatorios</p>
-                            <p class="text-sm text-gray-500">Vencimientos próximos a clientes</p>
+                        <div class="flex-1">
+                            <p class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Generar modelos masivo</p>
+                            <p class="text-sm text-text-tertiary">303, 111, 190, 200 para todos</p>
+                        </div>
+                    </button>
+                    <button class="group w-full p-4 border border-border-subtle rounded-xl hover:border-border hover:bg-surface-800/30 hover:shadow-card-hover transition-all duration-300 flex items-center space-x-3 text-left">
+                        <div class="w-10 h-10 rounded-lg bg-warning-500/20 border border-warning-500/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-5 h-5 text-warning-400 group-hover:text-warning-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h4M8 12l2-2m0 0l2 2m-2-2v8m-6 0v8m10-8v8m0-8h-4M8 12l-2 2m0 0l2 2m-2-2v8"></path></svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Enviar recordatorios</p>
+                            <p class="text-sm text-text-tertiary">Vencimientos próximos a clientes</p>
                         </div>
                     </button>
                 </div>
-            </div>
+            </section>
             
-            -- Últimas comunicaciones 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="font-semibold text-gray-900">Últimas comunicaciones</h3>
-                    <a href="/advisor/comunicaciones" class="text-sm text-blue-600 hover:text-blue-700">Ver todas</a>
+            <!-- Últimas Comunicaciones -->
+            <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden animate-fade-in">
+                <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+                    <h3 class="font-semibold text-text-primary">Últimas Comunicaciones</h3>
+                    <a href="/advisor/comunicaciones" class="text-sm font-medium text-brand-400 hover:text-brand-300">Ver todas</a>
+                </header>
+                <div class="divide-y divide-border-subtle">
+                    <article class="px-6 py-4 hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Tech Solutions SL</span>
+                            <span class="text-xs text-text-quaternary">Hace 10 min</span>
+                        </div>
+                        <p class="text-sm text-text-tertiary">Respuesta: Contrato indefinido técnico contable</p>
+                    </article>
+                    <article class="px-6 py-4 hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Comercial Norte SA</span>
+                            <span class="text-xs text-text-quaternary">Hace 2 horas</span>
+                        </div>
+                        <p class="text-sm text-text-tertiary">Consulta: Recurso reposición sanción Hacienda</p>
+                    </article>
+                    <article class="px-6 py-4 hover:bg-surface-800/30 transition-colors group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-medium text-text-primary group-hover:text-brand-400 transition-colors">Inmobiliaria Sur SL</span>
+                            <span class="text-xs text-text-quaternary">Ayer</span>
+                        </div>
+                        <p class="text-sm text-text-tertiary">Confirmación: Depósito cuentas ejercido 2024</p>
+                    </article>
                 </div>
-                <div class="divide-y divide-gray-100">
-                    <div class="px-6 py-4 hover:bg-gray-50">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-medium text-gray-900">Tech Solutions SL</span>
-                            <span class="text-xs text-gray-500">Hace 10 min</span>
-                        </div>
-                        <p class="text-sm text-gray-600">Respuesta: Contrato indefinido técnico contable</p>
-                    </div>
-                    <div class="px-6 py-4 hover:bg-gray-50">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-medium text-gray-900">Comercial Norte SA</span>
-                            <span class="text-xs text-gray-500">Hace 2 horas</span>
-                        </div>
-                        <p class="text-sm text-gray-600">Consulta: Recurso reposición sanción Hacienda</p>
-                    </div>
-                    <div class="px-6 py-4 hover:bg-gray-50">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-medium text-gray-900">Inmobiliaria Sur SL</span>
-                            <span class="text-xs text-gray-500">Ayer</span>
-                        </div>
-                        <p class="text-sm text-gray-600">Confirmación: Depósito cuentas ejercido 2024</p>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     </div>
 </div>
