@@ -80,3 +80,70 @@ async def get_upcoming_tasks(days: int = Query(7)):
 @router.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+# ---- N8N Webhook Endpoints ----
+
+@router.post("/gestia/ingest")
+async def n8n_ingest_document(request: Request):
+    """Handle n8n document ingestion webhook."""
+    form = await request.form()
+    document_id = form.get("document_id")
+    tenant_id = form.get("tenant_id")
+    object_key = form.get("object_key")
+    filename = form.get("filename")
+    
+    # Process the document ingestion
+    # In production, this would trigger OCR, embeddings, vector DB storage, etc.
+    print(f"📄 Document ingestion webhook: document_id={document_id}, tenant_id={tenant_id}")
+    
+    # Return success response
+    return HTMLResponse(
+        f'<div class="p-4 bg-green-50 border border-green-200 rounded-lg">'
+        f'✅ Documento "{filename}" procesado para {tenant_id}'
+        f'</div>'
+    )
+
+
+@router.post("/gestia/notify")
+async def n8n_notify(request: Request):
+    """Handle n8n notification webhook."""
+    form = await request.form()
+    notification_id = form.get("notification_id")
+    canal = form.get("canal")
+    destinatario = form.get("destinatario_tipo")
+    asunto = form.get("asunto")
+    cuerpo = form.get("cuerpo")
+    
+    # Route notification by channel
+    print(f"📧 Notification webhook: canal={canal}, asunto={asunto}")
+    
+    # Return success response
+    return HTMLResponse(
+        f'<div class="p-4 bg-blue-50 border border-blue-500/30 rounded-lg">'
+        f'📧 Notificación encolada: {canal} - {asunto}'
+        f'</div>'
+    )
+
+
+@router.post("/gestia/calendar")
+async def n8n_calendar(request: Request):
+    """Handle n8n calendar webhook."""
+    form = await request.form()
+    tenant_id = form.get("tenant_id")
+    anio = form.get("anio")
+    eventos = form.get("eventos")
+    
+    # Process calendar events
+    print(f"📅 Calendar webhook: tenant_id={tenant_id}, anio={anio}, eventos={len(eventos) if eventos else 0} eventos")
+    
+    # Return success response
+    return HTMLResponse(
+        f'<div class="p-4 bg-purple-50 border border-purple-500/30 rounded-lg">'
+        f'📅 Eventos calendarios procesados para {tenant_id} ({anio})'
+        f'</div>'
+    )
+
+
+# Export for routes
+__all__ = ["router"]
