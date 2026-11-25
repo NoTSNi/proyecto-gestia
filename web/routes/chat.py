@@ -100,5 +100,6 @@ async def chat_ask(request: Request):
             "routing_confidence": result.get("routing_confidence"),
             "strategy": result.get("strategy"),
             "specialists": result.get("specialists_consulted", []),
+            "budget": result.get("budget"),
         },
     )

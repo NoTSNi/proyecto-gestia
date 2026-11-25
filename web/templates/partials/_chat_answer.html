@@ -27,4 +27,10 @@
         Especialistas consultados: {{ specialists|join(', ') }}
     </div>
     {% endif %}
+
+    {% if budget and budget.get('tokens_estimados') is not none %}
+    <div class="mt-2 text-xs text-text-quaternary">
+        Coste estimado: {{ budget.tokens_estimados }} tokens · {{ budget.operaciones }} operaciones{% if budget.excedido %} · ⚠ presupuesto excedido{% endif %}
+    </div>
+    {% endif %}
 </div>

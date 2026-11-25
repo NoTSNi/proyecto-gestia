@@ -77,8 +77,11 @@ async def consultar_gestia(
     """
     client_data = await cargar_client_data(tenant_id)
 
-    # ChiefAgent fresco por consulta: sin estado compartido entre requests
-    chief = ChiefAgent(client_data=client_data or None)
+    # ChiefAgent fresco por consulta: sin estado compartido entre requests.
+    # Presupuesto por consulta (Fase E): limite de subtareas, iteraciones y timeout.
+    from agents.cost_control import AgentBudget
+    budget = AgentBudget(max_subtareas=6, max_iteraciones=3, timeout_seg=30.0)
+    chief = ChiefAgent(client_data=client_data or None, budget=budget)
 
     context = AgentContext(
         tenant_id=tenant_id,
@@ -119,5 +122,13 @@ async def consultar_gestia(
         result.data.get("specialists_consulted", [])
         if result.data else []
     )
+
+    # Informe de presupuesto/coste (Fase E)
+    chief_md_budget = chief_md.get("budget") or {}
+    response["budget"] = chief_md_budget
+
+    # Error controlado si se excedió el presupuesto
+    if result.error in ("budget_exceeded", "budget_timeout"):
+        response["success"] = False
 
     return response

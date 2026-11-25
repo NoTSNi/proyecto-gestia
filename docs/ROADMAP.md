@@ -61,7 +61,7 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [x] **2FA (TOTP)** con `pyotp`: activación con QR (Google Auth/Authy/MS Auth), 10 códigos de recuperación de un solo uso, verificación en login en 2 pasos, desactivación. Disponible para todos los roles (recomendado en asesor/admin).
 - [x] **Agente monitor de seguridad**: barrido del audit log (ráfagas de logins fallidos, cuentas bloqueadas, 2FA fallidos, cambios 2FA) → informe + resumen; panel `/advisor/seguridad` con botón "Ejecutar barrido".
 - [x] **Auditoría de seguridad**: tabla `audit_seguridad` (tipo, detalle, tenant, usuario, IP, severidad) para toda acción sensible.
-- [ ] **Anti-bucle y control de coste**: presupuesto de tokens por consulta, máx. iteraciones por agente, timeout, circuit breaker.
+- [x] **Anti-bucle y control de coste**: `agents/cost_control.py` — `AgentBudget` con límite de tokens por consulta, máx. iteraciones de descomposición, máx. subtareas, timeout global (`asyncio.timeout`); el ChiefAgent gasta tokens en cada operación y corta (devuelve error controlado) si se excede; informe de coste visible en el chat.
 - [ ] **Model routing**: mejor modelo por tarea (router barato/rápido, razonamiento potente, mecánico sin LLM); configurable por agente vía OpenRouter.
 - [ ] Alertas automatizadas del monitor (email/WhatsApp — Fase G).
 

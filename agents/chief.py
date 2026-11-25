@@ -4,6 +4,7 @@ GESTIA Agents - Chief Agent (Enhanced Supervisor with Executive Authority).
 """
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -110,9 +111,14 @@ class ChiefAgent(BaseAgent):
         policies: ChiefPolicies | None = None,
         memory: ChiefMemory | None = None,
         client_data: dict | None = None,
+        budget: "AgentBudget | None" = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
+        from agents.cost_control import AgentBudget
+        from agents.cost_control import CostePorOperacion
+        self.budget: AgentBudget = budget if budget is not None else AgentBudget()
+        self._costes = CostePorOperacion()
         
         # Specialists
         self.specialists = specialists or {
@@ -160,12 +166,39 @@ class ChiefAgent(BaseAgent):
         5. Consolidate & return
         """
         start_time = datetime.now()
-        
+        self.budget.start()
+
+        try:
+            async with asyncio.timeout(self.budget.timeout_seg):
+                return await self._process_inner(query, context, start_time)
+        except TimeoutError:
+            self.budget.excedido = True
+            return AgentResponse(
+                agent=self.name,
+                success=False,
+                response="Tiempo de cómputo agotado. La consulta era demasiado compleja; reformúlala o divídela en partes.",
+                data={"budget": self.budget.informe},
+                error="budget_timeout",
+            )
+
+    def _budget_excedido(self) -> AgentResponse:
+        self.budget.excedido = True
+        return AgentResponse(
+            agent=self.name,
+            success=False,
+            response="Presupuesto de cómputo agotado. La consulta superó el límite de operaciones; divídela en preguntas más concretas.",
+            data={"budget": self.budget.informe},
+            error="budget_exceeded",
+        )
+
+    async def _process_inner(self, query: str, context: AgentContext, start_time: datetime) -> AgentResponse:
         # 1. Load conversation context
         await self._load_context(context)
         
         # 2. Policy/Compliance pre-check
-        compliance_check = await self.policies.check_compliance(query, context)
+        if not self.budget.gastar(self._costes.comprobar_compliance):
+            return self._budget_excedido()
+        compliance_check = await self.policies.check_compliance(query, context)        
         if not compliance_check.compliant:
             return AgentResponse(
                 agent=self.name,
@@ -176,11 +209,15 @@ class ChiefAgent(BaseAgent):
             )
         
         # 3. Classify intent & assess complexity
+        if not self.budget.gastar(self._costes.clasificar_intencion):
+            return self._budget_excedido()
         scores = await self._classify_intent(query)
         complexity = await self._assess_complexity(query, scores)
         
         # 4. Check for critical/legal issues requiring escalation
         if self.auto_escalate_critical:
+            if not self.budget.gastar(self._costes.evaluar_escalado):
+                return self._budget_excedido()
             escalation_check = await self.escalation_manager.check_escalation(query, scores, context)
             if escalation_check.should_escalate:
                 return await self._handle_escalation(query, context, escalation_check)
@@ -239,6 +276,7 @@ class ChiefAgent(BaseAgent):
             "routed_by": "chief",
             "routing_confidence": best_score,
             "quality_score": qc_result.score,
+            "budget": self.budget.informe,
             "processing_time_ms": (datetime.now() - datetime.now()).total_seconds() * 1000,
         }
         
@@ -287,6 +325,7 @@ class ChiefAgent(BaseAgent):
             "specialists_involved": [s.specialist for s in subtasks],
             "complexity_type": complexity.type,
             "quality_scores": [qc.score for qc in qc_results],
+            "budget": self.budget.informe,
         }
         
         return consolidated
@@ -303,8 +342,24 @@ class ChiefAgent(BaseAgent):
         """Execute subtasks respecting dependencies."""
         completed: dict[str, AgentResponse] = {}
         remaining = {s.id: s for s in subtasks}
+        iteraciones = 0
+        ejecutadas = 0
         
         while remaining:
+            iteraciones += 1
+            # ANTI-BUCLE: límite de iteraciones de descomposición
+            if iteraciones > self.budget.max_iteraciones or ejecutadas >= self.budget.max_subtareas:
+                # Dejar el resto como no ejecutadas (no gastar más)
+                for sid in list(remaining.keys()):
+                    remaining[sid].status = TaskStatus.REJECTED
+                    completed[sid] = AgentResponse(
+                        agent=remaining[sid].specialist,
+                        success=False,
+                        response="Subtarea cancelada por presupuesto de cómputo (límite de operaciones).",
+                        error="budget_exceeded",
+                    )
+                break
+
             # Find ready tasks (dependencies met)
             ready = [
                 s for s in remaining.values()
@@ -318,6 +373,17 @@ class ChiefAgent(BaseAgent):
             # Execute ready tasks in parallel
             tasks = []
             for subtask in ready:
+                # Gasto de tokens por subtarea (anti-fuga)
+                if not self.budget.gastar(self._costes.subtarea):
+                    subtask.status = TaskStatus.REJECTED
+                    completed[subtask.id] = AgentResponse(
+                        agent=subtask.specialist,
+                        success=False,
+                        response="Subtarea cancelada por presupuesto de cómputo.",
+                        error="budget_exceeded",
+                    )
+                    continue
+                ejecutadas += 1
                 subtask.status = TaskStatus.IN_PROGRESS
                 subtask.assigned_at = datetime.now()
                 specialist = self.specialists[subtask.specialist]
