@@ -63,16 +63,49 @@ async def dashboard(request: Request):
 @router.get("/documentos", response_class=HTMLResponse)
 async def documentos(request: Request):
     user, empresa = await _get_tenant_or_401(request)
+    anio = request.query_params.get("anio")
+    mes = request.query_params.get("mes")
+    query = (request.query_params.get("q") or "").strip()
+    if query:
+        archivos = await database.buscar_archivos(empresa["id"], query)
+    else:
+        archivos = await database.list_archivos(empresa["id"], anio=anio, mes=mes)
     docs = await database.list_documentos(empresa["id"])
+    grupos = await database.list_anios_meses(empresa["id"])
     return await request.app.state.render_template(
         "client_documentos.html",
         {
             "request": request, "user": user, "empresa": empresa,
             "user_initials": _initials(empresa["nombre"]),
             "user_name": empresa["nombre"], "user_role": _role_label(user["rol"]),
-            "documentos": docs, "rol": user["rol"],
+            "documentos": docs, "archivos": archivos, "grupos": grupos,
+            "anio": anio, "mes": mes, "query": query, "rol": user["rol"],
         },
     )
+
+
+@router.post("/documentos/subir")
+async def subir_documento(request: Request):
+    """Sube un documento: cuarentena + extracción + indexado (Fase D)."""
+    from web.services.vault import ArchivoRechazado, ingestar_archivo
+
+    user, empresa = await _get_tenant_or_401(request)
+    form = await request.form()
+    archivo = form.get("archivo")
+    if archivo is None or not getattr(archivo, "filename", ""):
+        return RedirectResponse(url="/client/documentos?error=sinarchivo", status_code=303)
+
+    contenido = await archivo.read()
+    try:
+        await ingestar_archivo(
+            tenant_id=empresa["id"],
+            nombre_original=archivo.filename,
+            contenido=contenido,
+            subido_por=user["email"],
+        )
+        return RedirectResponse(url="/client/documentos?ok=subido", status_code=303)
+    except ArchivoRechazado as e:
+        return RedirectResponse(url=f"/client/documentos?error={e}", status_code=303)
 
 
 @router.get("/facturas", response_class=HTMLResponse)

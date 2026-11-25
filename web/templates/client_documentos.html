@@ -6,32 +6,81 @@
 
 {% block content %}
 <div class="space-y-6 animate-fade-in">
-    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
-        <h2 class="text-xl font-semibold tracking-tight">Expediente de {{ empresa.nombre }}</h2>
-        <p class="text-text-tertiary text-sm mt-1">{{ documentos|length }} documentos registrados</p>
-    </div>
+    {% if request.query_params.get('error') %}
+    <div class="px-4 py-3 bg-danger-500/10 border border-danger-500/30 rounded-lg text-sm text-danger-400">{{ request.query_params.get('error') }}</div>
+    {% endif %}
+    {% if request.query_params.get('ok') == 'subido' %}
+    <div class="px-4 py-3 bg-success-500/10 border border-success-500/30 rounded-lg text-sm text-success-500">Documento subido, verificado y clasificado. Solo se trata como datos — nunca como instrucciones.</div>
+    {% endif %}
+
+    <!-- Subida -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold text-text-primary mb-1">Subir documento</h3>
+        <p class="text-sm text-text-tertiary mb-4">PDF, imagen, texto o Excel (sin macros). El archivo se verifica (tipo real, hash), se guarda por <strong>año/mes</strong> y se indexa para búsqueda.</p>
+        <form method="post" action="/client/documentos/subir" enctype="multipart/form-data" class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[250px]">
+                <input type="file" name="archivo" required
+                       accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.xlsx"
+                       class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-brand-600 file:text-white file:text-sm file:font-medium hover:file:bg-brand-500 focus:outline-none focus:border-brand-500">
+            </div>
+            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Subir</button>
+        </form>
+    </section>
+
+    <!-- Búsqueda -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold text-text-primary mb-3">Buscar en tus documentos</h3>
+        <form method="get" action="/client/documentos" class="flex gap-3">
+            <input name="q" value="{{ query }}" placeholder="Ej: factura, nómina, contrato, 303, proveedor..."
+                   class="w-full px-4 py-2.5 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            <button type="submit" class="px-5 py-2.5 bg-surface-800 border border-border-subtle hover:border-brand-500/40 text-text-secondary hover:text-text-primary text-sm font-medium rounded-lg transition-colors">Buscar</button>
+        </form>
+    </section>
+
+    <!-- Navegación por año/mes -->
+    {% if grupos and not query %}
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl p-4">
+        <h3 class="text-xs font-medium text-text-quaternary uppercase tracking-wider mb-3">Archivado por año y mes</h3>
+        <div class="flex flex-wrap gap-2">
+            <a href="/client/documentos" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {% if not anio %}bg-brand-600/20 border border-brand-600/30 text-brand-400{% else %}bg-surface-800 border border-border-subtle text-text-tertiary hover:text-text-primary{% endif %}">Todo</a>
+            {% for g in grupos %}
+            <a href="/client/documentos?anio={{ g.anio }}&mes={{ g.mes }}" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {% if anio == g.anio and mes == g.mes %}bg-brand-600/20 border border-brand-600/30 text-brand-400{% else %}bg-surface-800 border border-border-subtle text-text-tertiary hover:text-text-primary{% endif %}">{{ g.mes }}/{{ g.anio }} · {{ g.n }}</a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Listado de archivos subidos -->
     <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+            <h3 class="font-semibold text-text-primary">
+                {% if query %}Resultados para "{{ query }}"{% else %}Archivos subidos{% endif %}
+            </h3>
+            <span class="px-2 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs font-medium rounded-pill">{{ archivos|length }}</span>
+        </header>
+        {% if archivos %}
         <div class="divide-y divide-border-subtle">
-            {% for d in documentos %}
+            {% for a in archivos %}
             <div class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors">
                 <div class="flex items-center space-x-4 min-w-0">
                     <div class="w-10 h-10 rounded-lg bg-brand-500/20 border border-brand-500/30 flex items-center justify-center flex-shrink-0">
                         <svg class="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
                     <div class="min-w-0">
-                        <p class="font-medium text-text-primary truncate">{{ d.nombre }}</p>
-                        <p class="text-sm text-text-tertiary truncate">{{ d.tipo }}</p>
+                        <p class="font-medium text-text-primary truncate">{{ a.nombre }}</p>
+                        <p class="text-sm text-text-tertiary truncate">{{ a.clasificacion }} · {{ a.tipo }} · {{ (a.tamano / 1024)|round(1) }} KB</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 flex-shrink-0">
-                    {% if d.monto %}<span class="text-sm text-text-secondary">{{ d.monto }}</span>{% endif %}
-                    <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">{{ d.estado }}</span>
+                    <span class="px-2 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs rounded-pill">{{ a.mes }}/{{ a.anio }}</span>
+                    <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">{{ a.estado }}</span>
                 </div>
             </div>
-            {% else %}
-            <p class="px-6 py-10 text-sm text-text-tertiary">No hay documentos todavía.</p>
             {% endfor %}
         </div>
+        {% else %}
+        <p class="px-6 py-10 text-sm text-text-tertiary">{% if query %}Sin resultados para la búsqueda.{% else %}Aún no has subido documentos. Los que subas se guardarán aquí, clasificados por año y mes.{% endif %}</p>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

@@ -138,6 +138,28 @@ CREATE TABLE IF NOT EXISTS log_validaciones (
     created_at  TEXT NOT NULL,
     FOREIGN KEY (tenant_id) REFERENCES empresas(id)
 );
+
+CREATE TABLE IF NOT EXISTS archivos (
+    id          TEXT PRIMARY KEY,
+    tenant_id   TEXT NOT NULL,
+    nombre      TEXT NOT NULL,
+    ruta        TEXT NOT NULL,
+    tipo        TEXT,
+    tamano      INTEGER,
+    hash_sha256 TEXT NOT NULL,
+    anio        TEXT NOT NULL,
+    mes         TEXT NOT NULL,
+    estado      TEXT NOT NULL DEFAULT 'clasificado',
+    texto       TEXT DEFAULT '',
+    clasificacion TEXT,
+    subido_por  TEXT,
+    created_at  TEXT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS archivos_fts_v2 USING fts5(
+    nombre, texto, archivo_id UNINDEXED, tokenize='porter unicode61'
+);
 """
 
 _demo_empresas = [
@@ -629,6 +651,116 @@ async def list_consultas(tenant_id: str | None = None, limit: int = 100) -> list
             )
         rows = await cur.fetchall()
         return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+# ---------------------------------------------------------------------------
+# DOCUMENT VAULT (Fase D)
+# ---------------------------------------------------------------------------
+
+async def registrar_archivo(
+    tenant_id: str, nombre: str, ruta: str, tipo: str | None, tamano: int,
+    hash_sha256: str, anio: str, mes: str, texto: str, clasificacion: str,
+    subido_por: str | None = None,
+) -> dict:
+    """Guarda el registro del archivo y lo indexa en FTS5."""
+    conn = await get_db()
+    try:
+        now = _now()
+        aid = _new_id()
+        await conn.execute(
+            """INSERT INTO archivos
+            (id, tenant_id, nombre, ruta, tipo, tamano, hash_sha256, anio, mes,
+             estado, texto, clasificacion, subido_por, created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (aid, tenant_id, nombre, ruta, tipo, tamano, hash_sha256, anio, mes,
+             "indexado", texto, clasificacion, subido_por, now),
+        )
+        # Índice FTS5 (archivo_id UNINDEXED para cruzar; rowid numérico automático)
+        await conn.execute("INSERT INTO archivos_fts_v2(nombre, texto, archivo_id) VALUES (?,?,?)",
+                           (nombre, texto, aid))
+        await conn.commit()
+        return {"id": aid}
+    finally:
+        await conn.close()
+
+
+async def buscar_hash(tenant_id: str) -> list[str]:
+    conn = await get_db()
+    try:
+        cur = await conn.execute(
+            "SELECT hash_sha256 FROM archivos WHERE tenant_id = ?", (tenant_id,)
+        )
+        rows = await cur.fetchall()
+        return [r["hash_sha256"] for r in rows]
+    finally:
+        await conn.close()
+
+
+async def list_archivos(tenant_id: str | None = None, anio: str | None = None,
+                        mes: str | None = None) -> list[dict]:
+    """Lista archivos del tenant, opcionalmente filtrado por año/mes."""
+    conn = await get_db()
+    try:
+        where, params = [], []
+        if tenant_id:
+            where.append("tenant_id = ?")
+            params.append(tenant_id)
+        if anio:
+            where.append("anio = ?")
+            params.append(anio)
+        if mes:
+            where.append("mes = ?")
+            params.append(mes)
+        sql = "SELECT * FROM archivos"
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        sql += " ORDER BY created_at DESC"
+        cur = await conn.execute(sql, params)
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def list_anios_meses(tenant_id: str) -> list[dict]:
+    """Agrupa los archivos por año/mes para la navegación."""
+    conn = await get_db()
+    try:
+        cur = await conn.execute(
+            """SELECT anio, mes, COUNT(*) n FROM archivos
+            WHERE tenant_id = ? GROUP BY anio, mes ORDER BY anio DESC, mes DESC""",
+            (tenant_id,),
+        )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def buscar_archivos(tenant_id: str, query: str, limit: int = 20) -> list[dict]:
+    """Búsqueda full-text (FTS5) AISLADA por tenant.
+
+    El índice FTS5 no tiene tenant_id, así que se filtra cruzando con la tabla
+    archivos (que sí está aislada). El texto devuelto es SOLO datos de ese tenant.
+    """
+    conn = await get_db()
+    try:
+        # FTS5: término con prefijo para matches parciales
+        termino = " ".join(f'"{w}"*' for w in query.split() if w)
+        cur = await conn.execute(
+            """SELECT a.* FROM archivos_fts_v2 f
+            JOIN archivos a ON a.id = f.archivo_id
+            WHERE a.tenant_id = ? AND archivos_fts_v2 MATCH ?
+            ORDER BY bm25(archivos_fts_v2) LIMIT ?""",
+            (tenant_id, termino, limit),
+        )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    except Exception:
+        # FTS5 puede fallar con queries extrañas; devolver vacío
+        return []
     finally:
         await conn.close()
 

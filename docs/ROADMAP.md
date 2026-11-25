@@ -43,12 +43,17 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 
 **Decisión de diseño acordada**: la BD es la fuente de verdad; el Excel es el entregable descargable (hoja principal + log). Los agentes consultan la BD para PYG/IVA/TC1.
 
-## Fase D — Document Vault integrado
+## Fase D — Document Vault integrado (✅ núcleo completado)
 
-- [ ] Subida → cuarentena → OCR → clasificación → embeddings (all-MiniLM-L6-v2) → índice por tenant
-- [ ] Búsqueda semántica en el portal
-- [ ] Los agentes citan documentos reales en sus respuestas
-- [ ] Aislamiento total del índice por tenant
+- [x] Subida de archivos reales desde el portal cliente con **cuarentena**: allowlist por magic bytes (no extensión), hash SHA-256 anti-duplicados, rechazo de ejecutables/macros (.exe, .xlsm, .docm...)
+- [x] Extracción de texto: PDF (pypdf), XLSX (solo lectura de celdas), TXT/CSV
+- [x] **Almacenamiento por `empresa/año/mes/`** (data/vault/<tenant>/<año>/<mes>) + metadatos en BD
+- [x] Clasificación automática por keywords (factura, nómina, contrato, modelo fiscal, escritura, extracto)
+- [x] **Búsqueda full-text (FTS5)** aislada por tenant en el portal cliente
+- [x] Navegación por año/mes en el portal
+- [x] Los agentes reciben el inventario de archivos del tenant en el contexto
+- [ ] Embeddings semánticos (all-MiniLM-L6-v2) + búsqueda por similitud — mejora de calidad, FTS5 ya cubre el caso base
+- [ ] Descarga del archivo original desde el portal
 
 ## Fase E — Seguridad en profundidad
 

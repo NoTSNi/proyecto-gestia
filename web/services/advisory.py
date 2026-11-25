@@ -28,6 +28,7 @@ async def cargar_client_data(tenant_id: str) -> dict:
     notificaciones = await database.list_notificaciones(tenant_id)
     eventos = await database.list_eventos(tenant_id)
     usuarios = await database.list_usuarios(tenant_id)
+    archivos = await database.list_archivos(tenant_id)
 
     return {
         "empresa": {
@@ -52,6 +53,12 @@ async def cargar_client_data(tenant_id: str) -> dict:
         "documentos": documentos,
         "notificaciones": notificaciones,
         "calendario": eventos,
+        "archivos": [
+            {"nombre": a.get("nombre"), "clasificacion": a.get("clasificacion"),
+             "tipo": a.get("tipo"), "anio": a.get("anio"), "mes": a.get("mes"),
+             "estado": a.get("estado")}
+            for a in archivos
+        ],
         "usuarios": [
             {"full_name": u.get("full_name"), "email": u.get("email"), "rol": u.get("rol")}
             for u in usuarios
