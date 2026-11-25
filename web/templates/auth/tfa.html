@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación 2FA - GESTIA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+                colors: {
+                    brand: { 400:'#828fff',500:'#7170ff',600:'#5e6ad2',700:'#4d56b0' },
+                    surface: { 950:'#08090a',900:'#0f1011',800:'#191a1b',700:'#28282c' },
+                    text: { primary:'#f7f8f8',secondary:'#d0d6e0',tertiary:'#8a8f98',quaternary:'#62666d' },
+                    border: { subtle:'rgba(255,255,255,0.05)', DEFAULT:'rgba(255,255,255,0.08)' },
+                    danger: { 400:'#f87171',500:'#ef4444' },
+                },
+            }},
+        }
+    </script>
+</head>
+<body class="dark bg-surface-950 text-text-primary min-h-screen antialiased font-sans">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <div class="flex items-center justify-center space-x-3 mb-8">
+                <div class="w-11 h-11 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <div class="text-left">
+                    <h1 class="text-xl font-semibold tracking-tight">GESTIA</h1>
+                    <p class="text-xs text-text-tertiary tracking-wide uppercase">Verificación en dos pasos</p>
+                </div>
+            </div>
+
+            <div class="bg-surface-900/70 border border-border-subtle rounded-2xl p-8">
+                <h2 class="text-lg font-semibold mb-1">Código de seguridad</h2>
+                <p class="text-sm text-text-tertiary mb-6">Introduce el código de 6 dígitos de tu aplicación de autenticación, o un código de recuperación.</p>
+
+                {% if error %}
+                <div class="mb-4 px-4 py-3 bg-danger-500/10 border border-danger-500/30 rounded-lg text-sm text-danger-400">{{ error }}</div>
+                {% endif %}
+
+                <form method="post" action="/auth/2fa" class="space-y-4">
+                    <input type="hidden" name="u" value="{{ email }}">
+                    <div>
+                        <label for="codigo" class="block text-sm font-medium text-text-secondary mb-1.5">Código (TOTP o recuperación)</label>
+                        <input type="text" id="codigo" name="codigo" required autofocus autocomplete="one-time-code"
+                               placeholder="000-000"
+                               class="w-full px-3.5 py-2.5 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-center text-lg tracking-widest transition-all">
+                    </div>
+                    <button type="submit"
+                            class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg transition-colors shadow-lg shadow-brand-600/25">
+                        Verificar
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-xs text-text-quaternary mt-6">¿Problemas con tu código? Contacta con el administrador de tu asesoría.</p>
+        </div>
+    </div>
+</body>
+</html>

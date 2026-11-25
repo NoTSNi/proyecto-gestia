@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Seguridad - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Seguridad{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-xl font-semibold tracking-tight">Monitor de seguridad</h2>
+                <p class="text-text-tertiary text-sm mt-1">Análisis de la actividad de los últimos {{ informe.dias }} día(s). {{ informe.eventos }} eventos auditados.</p>
+            </div>
+            <form method="post" action="/advisor/seguridad/escanear">
+                <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">🔍 Ejecutar barrido</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Estado del monitor -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Eventos auditados</p>
+            <p class="text-3xl font-semibold text-text-primary">{{ informe.eventos }}</p>
+            <p class="text-xs text-text-tertiary mt-1">Últimos {{ informe.dias }} día(s)</p>
+        </article>
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Anomalías</p>
+            <p class="text-3xl font-semibold {% if informe.alerta %}text-danger-400{% else %}text-success-500{% endif %}">{{ informe.anomalias|length }}</p>
+            <p class="text-xs text-text-tertiary mt-1">{% if informe.alerta %}Requiere revisión{% else %}Sin incidencias{% endif %}</p>
+        </article>
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Estado</p>
+            <p class="text-3xl font-semibold {% if informe.alerta %}text-warning-500{% else %}text-success-500{% endif %}">{% if informe.alerta %}⚠{% else %}✓{% endif %}</p>
+            <p class="text-xs text-text-tertiary mt-1">{% if informe.alerta %}Alerta activa{% else %}Sistema seguro{% endif %}</p>
+        </article>
+    </div>
+
+    <!-- Anomalías del monitor -->
+    {% if informe.anomalias %}
+    <section class="bg-surface-900/50 border border-danger-500/30 rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle bg-danger-500/10">
+            <h3 class="font-semibold text-danger-400">Anomalías detectadas</h3>
+        </header>
+        <div class="divide-y divide-border-subtle">
+            {% for a in informe.anomalias %}
+            <div class="px-6 py-3 text-sm text-text-primary flex items-start gap-2">
+                <span class="text-danger-400">⚠</span> {{ a }}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <div class="bg-surface-900/50 border border-success-500/30 rounded-xl p-6 text-sm text-success-500">
+        ✓ No se detectaron anomalías de seguridad en la última ventana.
+    </div>
+    {% endif %}
+
+    <!-- Cambios 2FA recientes -->
+    {% if informe.detalle.get('2fa_cambios') %}
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle">
+            <h3 class="font-semibold text-text-primary">Cambios de 2FA</h3>
+        </header>
+        <div class="divide-y divide-border-subtle">
+            {% for c in informe.detalle['2fa_cambios'] %}
+            <div class="px-6 py-3 flex items-center justify-between">
+                <p class="text-sm text-text-primary">{{ c.usuario }}</p>
+                <span class="px-2 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs rounded-pill">{{ c.tipo }} · {{ c.cuando[:16].replace('T',' ') }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Audit log -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+            <h3 class="font-semibold text-text-primary">Registro de auditoría</h3>
+            <span class="px-2 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs font-medium rounded-pill">{{ registros|length }} eventos</span>
+        </header>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Fecha</th>
+                        <th class="px-6 py-3">Tipo</th>
+                        <th class="px-6 py-3">Severidad</th>
+                        <th class="px-6 py-3">Detalle</th>
+                        <th class="px-6 py-3">Usuario</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for r in registros %}
+                    <tr class="hover:bg-surface-800/30 transition-colors">
+                        <td class="px-6 py-3 text-xs text-text-quaternary whitespace-nowrap">{{ r.created_at[:19].replace('T',' ') }}</td>
+                        <td class="px-6 py-3 text-text-secondary">{{ r.tipo }}</td>
+                        <td class="px-6 py-3">
+                            {% set sev = r.severidad|default('info') %}
+                            <span class="px-2 py-0.5 text-xs rounded-full {% if sev == 'alta' %}bg-danger-500/20 text-danger-400{% elif sev == 'media' %}bg-warning-500/20 text-warning-500{% else %}bg-surface-800 text-text-tertiary{% endif %}">{{ sev }}</span>
+                        </td>
+                        <td class="px-6 py-3 text-text-primary">{{ r.detalle }}</td>
+                        <td class="px-6 py-3 text-xs text-text-tertiary">{{ r.usuario or '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="px-6 py-10 text-text-tertiary">Sin eventos de auditoría aún.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

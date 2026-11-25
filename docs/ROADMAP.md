@@ -55,14 +55,15 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [ ] Embeddings semánticos (all-MiniLM-L6-v2) + búsqueda por similitud — mejora de calidad, FTS5 ya cubre el caso base
 - [ ] Descarga del archivo original desde el portal
 
-## Fase E — Seguridad en profundidad
+## Fase E — Seguridad en profundidad (✅ núcleo completado)
 
-- [ ] **Anti-hackeo de login**: bloqueo de usuario tras N intentos fallidos (p. ej. 5), con temporización creciente; desbloqueo vía restablecimiento de contraseña con 2FA o contacto con el administrador. Pendiente de diseño con el cliente.
-- [ ] **2FA (TOTP)** para cuentas de asesor/admin (obligatorio) y clientes (opcional): `pyotp`, QR, 10 códigos de recuperación. *Adelantable — argumento de venta antes de la primera visita a una asesoría.*
-- [ ] **Agente monitor de seguridad**: revisa el audit log (accesos no permitidos, login fallidos, subidas sospechosas, accesos cross-tenant) en ejecución programada y alerta a la asesoría
-- [ ] **Anti-bucle y control de coste**: presupuesto de tokens por consulta, máx. iteraciones por agente, timeout, circuit breaker
-- [ ] **Model routing**: mejor modelo por tarea (router barato/rápido, razonamiento potente, mecánico sin LLM); configurable por agente vía OpenRouter
-- [ ] Rate limiting, auditoría append-only de toda acción sensible
+- [x] **Anti-hackeo de login**: bloqueo tras 5 intentos fallidos en 15 min, con desbloqueo por administrador (que limpia el contador); registro de cada intento (email/IP/éxito) en `intentos_login`; auditoría de logins fallidos/bloqueados.
+- [x] **2FA (TOTP)** con `pyotp`: activación con QR (Google Auth/Authy/MS Auth), 10 códigos de recuperación de un solo uso, verificación en login en 2 pasos, desactivación. Disponible para todos los roles (recomendado en asesor/admin).
+- [x] **Agente monitor de seguridad**: barrido del audit log (ráfagas de logins fallidos, cuentas bloqueadas, 2FA fallidos, cambios 2FA) → informe + resumen; panel `/advisor/seguridad` con botón "Ejecutar barrido".
+- [x] **Auditoría de seguridad**: tabla `audit_seguridad` (tipo, detalle, tenant, usuario, IP, severidad) para toda acción sensible.
+- [ ] **Anti-bucle y control de coste**: presupuesto de tokens por consulta, máx. iteraciones por agente, timeout, circuit breaker.
+- [ ] **Model routing**: mejor modelo por tarea (router barato/rápido, razonamiento potente, mecánico sin LLM); configurable por agente vía OpenRouter.
+- [ ] Alertas automatizadas del monitor (email/WhatsApp — Fase G).
 
 ## Fase F — Bases de conocimiento por especialista (RAG curado)
 

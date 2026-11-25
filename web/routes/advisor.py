@@ -288,6 +288,51 @@ async def reportes(request: Request):
     return await _simple_render(request, user, "advisor_reportes.html")
 
 
+# ---------------------------------------------------------------------------
+# SEGURIDAD (Fase E)
+# ---------------------------------------------------------------------------
+
+@router.get("/seguridad", response_class=HTMLResponse)
+async def seguridad_panel(request: Request):
+    """Panel de seguridad: audit log + lanzar monitor."""
+    user = await get_current_user(request)
+    from web.services.monitor_seguridad import monitor_seguridad
+    registros = await database.list_audit_seguridad(limit=200)
+    informe = await monitor_seguridad(dias=1, persistence=False)
+    return await request.app.state.render_template(
+        "advisor_seguridad.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "rol": user["rol"],
+            "informe": informe,
+            "registros": registros,
+        },
+    )
+
+
+@router.post("/seguridad/escanear")
+async def seguridad_escanear(request: Request):
+    """Lanza un barrido de seguridad y guarda el resultado en el audit log."""
+    user = await get_current_user(request)
+    from web.services.monitor_seguridad import monitor_seguridad
+    informe = await monitor_seguridad(dias=1, persistence=True, ip=request.client.host if request.client else None)
+    return RedirectResponse(url="/advisor/seguridad", status_code=303)
+
+
+@router.post("/usuarios/{usuario_id}/desbloquear")
+async def desbloquear_usuario(request: Request, usuario_id: str):
+    """Desbloquea una cuenta (deshace el bloqueo por anti-brute-force)."""
+    user = await get_current_user(request)
+    await database.bloquear_usuario(usuario_id, bloquear=False)
+    await database.auditar_seguridad(
+        "usuario_desbloqueado", f"Cuenta desbloqueada por {user['email']}",
+        usuario=user["email"], ip=request.client.host if request.client else None, severidad="media",
+    )
+    return RedirectResponse(url="/advisor/usuarios", status_code=303)
+
+
 async def _simple_render(request: Request, user: dict, template_name: str):
     return await request.app.state.render_template(
         template_name,

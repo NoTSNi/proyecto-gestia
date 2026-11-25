@@ -56,9 +56,37 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol           TEXT NOT NULL DEFAULT 'cliente',
     tenant_id     TEXT,
     activo        INTEGER NOT NULL DEFAULT 1,
+    tfa_secret    TEXT,
+    tfa_activado  INTEGER NOT NULL DEFAULT 0,
+    recovery_codes TEXT DEFAULT '[]',
+    bloqueado     INTEGER NOT NULL DEFAULT 0,
+    intentos_fallidos INTEGER NOT NULL DEFAULT 0,
+    ultimo_intento TEXT,
     created_at    TEXT NOT NULL,
     updated_at    TEXT NOT NULL,
     FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
+
+CREATE TABLE IF NOT EXISTS intentos_login (
+    id         TEXT PRIMARY KEY,
+    email      TEXT NOT NULL,
+    ip         TEXT,
+    exito      INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    created_ts REAL
+);
+
+CREATE INDEX IF NOT EXISTS idx_intentos_email ON intentos_login (email);
+
+CREATE TABLE IF NOT EXISTS audit_seguridad (
+    id         TEXT PRIMARY KEY,
+    tipo       TEXT NOT NULL,
+    detalle    TEXT,
+    tenant_id  TEXT,
+    usuario    TEXT,
+    ip         TEXT,
+    severidad  TEXT DEFAULT 'info',
+    created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS documentos (
@@ -286,6 +314,27 @@ async def init_db() -> None:
         for col in ("telefono", "movil", "email_contacto", "whatsapp", "web", "persona_contacto"):
             if col not in cols:
                 await conn.execute(f"ALTER TABLE empresas ADD COLUMN {col} TEXT")
+
+        # Migración ligera: columnas de seguridad 2FA en usuarios (Fase E)
+        cur = await conn.execute("PRAGMA table_info(usuarios)")
+        cols_usuario = {row["name"] for row in await cur.fetchall()}
+        for col_us in ("tfa_secret", "recovery_codes", "bloqueado", "intentos_fallidos", "ultimo_intento"):
+            if col_us not in cols_usuario:
+                tipo = "INTEGER NOT NULL DEFAULT 0" if col_us in ("bloqueado", "intentos_fallidos") else "TEXT"
+                if col_us == "tfa_activado":
+                    continue
+                await conn.execute(f"ALTER TABLE usuarios ADD COLUMN {col_us} {tipo}")
+        if "tfa_activado" not in cols_usuario:
+            await conn.execute("ALTER TABLE usuarios ADD COLUMN tfa_activado INTEGER NOT NULL DEFAULT 0")
+
+        # Migración ligera: created_ts (epoch) en intentos_login (Fase E)
+        try:
+            cur = await conn.execute("PRAGMA table_info(intentos_login)")
+            cols_int = {row["name"] for row in await cur.fetchall()}
+            if "created_ts" not in cols_int:
+                await conn.execute("ALTER TABLE intentos_login ADD COLUMN created_ts REAL")
+        except Exception:
+            pass
 
         now = _now()
         for emp in _demo_empresas:
@@ -761,6 +810,133 @@ async def buscar_archivos(tenant_id: str, query: str, limit: int = 20) -> list[d
     except Exception:
         # FTS5 puede fallar con queries extrañas; devolver vacío
         return []
+    finally:
+        await conn.close()
+
+
+# ---------------------------------------------------------------------------
+# SEGURIDAD (Fase E): intentos de login, auditoría, 2FA
+# ---------------------------------------------------------------------------
+
+async def registrar_intento_login(email: str, exito: bool, ip: str | None = None) -> None:
+    import time
+    conn = await get_db()
+    try:
+        await conn.execute(
+            "INSERT INTO intentos_login (id, email, ip, exito, created_at, created_ts) VALUES (?,?,?,?,?,?)",
+            (_new_id(), email.strip().lower(), ip, 1 if exito else 0, _now(), time.time()),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def contar_intentos_fallidos(email: str, ventana_min: int = 15) -> int:
+    """Cuenta intentos fallidos de un email en la última ventana (para bloquear)."""
+    import time
+    conn = await get_db()
+    try:
+        # Timestamps numéricos (epoch) para comparar de forma robusta
+        limite = time.time() - (ventana_min * 60)
+        cur = await conn.execute(
+            "SELECT COUNT(*) c FROM intentos_login WHERE email = ? AND exito = 0 AND created_ts >= ?",
+            (email.strip().lower(), limite),
+        )
+        row = await cur.fetchone()
+        return row["c"] if row else 0
+    finally:
+        await conn.close()
+
+
+async def auditar_seguridad(tipo: str, detalle: str, tenant_id: str | None = None,
+                            usuario: str | None = None, ip: str | None = None,
+                            severidad: str = "info") -> None:
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """INSERT INTO audit_seguridad (id, tipo, detalle, tenant_id, usuario, ip, severidad, created_at)
+            VALUES (?,?,?,?,?,?,?,?)""",
+            (_new_id(), tipo, detalle, tenant_id, usuario, ip, severidad, _now()),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def list_audit_seguridad(tipo: str | None = None, severidad: str | None = None,
+                               limit: int = 200) -> list[dict]:
+    conn = await get_db()
+    try:
+        where, params = [], []
+        if tipo:
+            where.append("tipo = ?"); params.append(tipo)
+        if severidad:
+            where.append("severidad = ?"); params.append(severidad)
+        sql = "SELECT * FROM audit_seguridad"
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        sql += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        cur = await conn.execute(sql, params)
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def activar_tfa(usuario_id: str, secret: str, recovery_codes: list[str]) -> None:
+    import json
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """UPDATE usuarios SET tfa_secret = ?, tfa_activado = 1, recovery_codes = ?, updated_at = ?
+            WHERE id = ?""",
+            (secret, json.dumps(recovery_codes), _now(), usuario_id),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def desactivar_tfa(usuario_id: str) -> None:
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """UPDATE usuarios SET tfa_activado = 0, recovery_codes = '[]', updated_at = ?
+            WHERE id = ?""",
+            (_now(), usuario_id),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def bloquear_usuario(usuario_id: str, bloquear: bool = True) -> None:
+    conn = await get_db()
+    try:
+        await conn.execute(
+            "UPDATE usuarios SET bloqueado = ?, updated_at = ? WHERE id = ?",
+            (1 if bloquear else 0, _now(), usuario_id),
+        )
+        if not bloquear:
+            # Al desbloquear, limpiar intentos fallidos recientes del email
+            cur = await conn.execute("SELECT email FROM usuarios WHERE id = ?", (usuario_id,))
+            row = await cur.fetchone()
+            if row:
+                await conn.execute("DELETE FROM intentos_login WHERE email = ?", (row["email"],))
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def registrar_intentos_2fa(usuario_id: str, intentos: int) -> None:
+    conn = await get_db()
+    try:
+        await conn.execute(
+            "UPDATE usuarios SET intentos_fallidos = ?, ultimo_intento = ?, updated_at = ? WHERE id = ?",
+            (intentos, _now(), _now(), usuario_id),
+        )
+        await conn.commit()
     finally:
         await conn.close()
 
