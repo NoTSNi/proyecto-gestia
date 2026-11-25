@@ -37,6 +37,12 @@ CREATE TABLE IF NOT EXISTS empresas (
     direccion        TEXT,
     municipio        TEXT,
     provincia        TEXT,
+    telefono         TEXT,
+    movil            TEXT,
+    email_contacto   TEXT,
+    whatsapp         TEXT,
+    web              TEXT,
+    persona_contacto TEXT,
     metadata_json    TEXT DEFAULT '{}',
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL
@@ -98,6 +104,38 @@ CREATE TABLE IF NOT EXISTS consultas (
     strategy   TEXT,
     success    INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
+
+CREATE TABLE IF NOT EXISTS facturas (
+    id              TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL,
+    emisor          TEXT,
+    nif_emisor      TEXT,
+    fecha_factura   TEXT,
+    numero          TEXT,
+    concepto        TEXT,
+    base            TEXT,
+    iva             TEXT,
+    total           TEXT,
+    tipo            TEXT DEFAULT 'recibida',
+    estado          TEXT NOT NULL DEFAULT 'pendiente_validacion',
+    archivo_original TEXT,
+    creado_por      TEXT,
+    validado_por    TEXT,
+    validado_en     TEXT,
+    created_at      TEXT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
+
+CREATE TABLE IF NOT EXISTS log_validaciones (
+    id          TEXT PRIMARY KEY,
+    tenant_id   TEXT NOT NULL,
+    factura_id  TEXT NOT NULL,
+    accion      TEXT NOT NULL,
+    detalle     TEXT,
+    usuario     TEXT,
+    created_at  TEXT NOT NULL,
     FOREIGN KEY (tenant_id) REFERENCES empresas(id)
 );
 """
@@ -219,6 +257,13 @@ async def init_db() -> None:
     conn = await get_db()
     try:
         await conn.executescript(_SCHEMA)
+
+        # Migración ligera: columnas de contacto (BD creadas antes de Fase C)
+        cur = await conn.execute("PRAGMA table_info(empresas)")
+        cols = {row["name"] for row in await cur.fetchall()}
+        for col in ("telefono", "movil", "email_contacto", "whatsapp", "web", "persona_contacto"):
+            if col not in cols:
+                await conn.execute(f"ALTER TABLE empresas ADD COLUMN {col} TEXT")
 
         now = _now()
         for emp in _demo_empresas:
@@ -366,14 +411,18 @@ async def crear_empresa(data: dict) -> str:
         await conn.execute(
             """INSERT INTO empresas
             (id, nif, nombre, nombre_comercial, regimen_iva, periodicidad_iva,
-             cnae, estado, direccion, municipio, provincia, metadata_json, created_at, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             cnae, estado, direccion, municipio, provincia, telefono, movil,
+             email_contacto, whatsapp, web, persona_contacto, metadata_json, created_at, updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 eid, data.get("nif", ""), data.get("nombre", ""),
                 data.get("nombre_comercial"), data.get("regimen_iva", "general"),
                 data.get("periodicidad_iva", "trimestral"), data.get("cnae"),
                 data.get("estado", "activa"), data.get("direccion"),
-                data.get("municipio"), data.get("provincia"), "{}", now, now,
+                data.get("municipio"), data.get("provincia"), data.get("telefono"),
+                data.get("movil"), data.get("email_contacto"), data.get("whatsapp"),
+                data.get("web"), data.get("persona_contacto"),
+                "{}", now, now,
             ),
         )
         await conn.commit()
@@ -400,14 +449,18 @@ async def actualizar_empresa(tenant_id: str, data: dict) -> None:
             """UPDATE empresas SET
                 nif = ?, nombre = ?, nombre_comercial = ?, regimen_iva = ?,
                 periodicidad_iva = ?, cnae = ?, direccion = ?, municipio = ?,
-                provincia = ?, estado = ?, updated_at = ?
+                provincia = ?, estado = ?, telefono = ?, movil = ?,
+                email_contacto = ?, whatsapp = ?, web = ?, persona_contacto = ?,
+                updated_at = ?
             WHERE id = ?""",
             (
                 data.get("nif", ""), data.get("nombre", ""),
                 data.get("nombre_comercial"), data.get("regimen_iva", "general"),
                 data.get("periodicidad_iva", "trimestral"), data.get("cnae"),
                 data.get("direccion"), data.get("municipio"), data.get("provincia"),
-                data.get("estado", "activa"), _now(), tenant_id,
+                data.get("estado", "activa"), data.get("telefono"), data.get("movil"),
+                data.get("email_contacto"), data.get("whatsapp"), data.get("web"),
+                data.get("persona_contacto"), _now(), tenant_id,
             ),
         )
         await conn.commit()
@@ -578,3 +631,169 @@ async def list_consultas(tenant_id: str | None = None, limit: int = 100) -> list
         return [dict(r) for r in rows]
     finally:
         await conn.close()
+
+
+# ---------------------------------------------------------------------------
+# FACTURAS + VALIDACIÓN (Fase C)
+# ---------------------------------------------------------------------------
+
+async def crear_factura(
+    tenant_id: str,
+    datos: dict,
+    creado_por: str | None = None,
+    archivo_original: str | None = None,
+) -> str:
+    """Crea una factura en estado pendiente de validación."""
+    conn = await get_db()
+    try:
+        now = _now()
+        fid = _new_id()
+        await conn.execute(
+            """INSERT INTO facturas
+            (id, tenant_id, emisor, nif_emisor, fecha_factura, numero, concepto,
+             base, iva, total, tipo, estado, archivo_original, creado_por, created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                fid, tenant_id,
+                datos.get("emisor"), datos.get("nif_emisor"),
+                datos.get("fecha_factura"), datos.get("numero"), datos.get("concepto"),
+                datos.get("base"), datos.get("iva"), datos.get("total"),
+                datos.get("tipo", "recibida"), "pendiente_validacion",
+                archivo_original, creado_por, now,
+            ),
+        )
+        await conn.commit()
+        return fid
+    finally:
+        await conn.close()
+
+
+async def list_facturas(tenant_id: str, estado: str | None = None) -> list[dict]:
+    conn = await get_db()
+    try:
+        if estado:
+            cur = await conn.execute(
+                "SELECT * FROM facturas WHERE tenant_id = ? AND estado = ? ORDER BY created_at DESC",
+                (tenant_id, estado),
+            )
+        else:
+            cur = await conn.execute(
+                "SELECT * FROM facturas WHERE tenant_id = ? ORDER BY created_at DESC",
+                (tenant_id,),
+            )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def validar_factura(factura_id: str, tenant_id: str, usuario: str, cambios: dict | None = None) -> None:
+    """Valida una factura pendiente: pasa a validada y registra el log."""
+    conn = await get_db()
+    try:
+        now = _now()
+        # Actualizar campos corregidos por el cliente si los hay
+        if cambios:
+            sets, params = [], []
+            for campo, valor in cambios.items():
+                if campo in ("emisor", "nif_emisor", "fecha_factura", "numero", "concepto",
+                             "base", "iva", "total"):
+                    sets.append(f"{campo} = ?")
+                    params.append(valor)
+            if sets:
+                params.append(factura_id)
+                await conn.execute(f"UPDATE facturas SET {', '.join(sets)} WHERE id = ?", params)
+
+        await conn.execute(
+            "UPDATE facturas SET estado = 'validada', validado_por = ?, validado_en = ? WHERE id = ? AND tenant_id = ?",
+            (usuario, now, factura_id, tenant_id),
+        )
+        await conn.execute(
+            """INSERT INTO log_validaciones (id, tenant_id, factura_id, accion, detalle, usuario, created_at)
+            VALUES (?,?,?,?,?,?,?)""",
+            (_new_id(), tenant_id, factura_id, "validada",
+             f"Validada por {usuario}" + (f" con correcciones: {cambios}" if cambios else ""),
+             usuario, now),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def list_log_validaciones(tenant_id: str, limit: int = 100) -> list[dict]:
+    conn = await get_db()
+    try:
+        cur = await conn.execute(
+            "SELECT * FROM log_validaciones WHERE tenant_id = ? ORDER BY created_at DESC LIMIT ?",
+            (tenant_id, limit),
+        )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def exportar_excel_empresa(tenant_id: str) -> bytes:
+    """Genera el Excel de la empresa: hoja principal + hoja del mes + hoja log.
+
+    Devuelve los bytes del .xlsx listos para descargar.
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+
+    empresa = await get_empresa(tenant_id)
+    facturas = await list_facturas(tenant_id)
+    log = await list_log_validaciones(tenant_id)
+
+    wb = Workbook()
+
+    # --- Hoja principal: facturas ---
+    ws = wb.active
+    ws.title = "Facturas"
+    header = ["Emisor", "NIF", "Fecha", "Número", "Concepto", "Base", "IVA", "Total", "Estado"]
+    ws.append(header)
+    for c in ws[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor="1f2937")
+    for f in facturas:
+        ws.append([
+            f.get("emisor"), f.get("nif_emisor"), f.get("fecha_factura"),
+            f.get("numero"), f.get("concepto"), f.get("base"),
+            f.get("iva"), f.get("total"), f.get("estado"),
+        ])
+    for col, width in zip("ABCDEFGHI", [30, 14, 12, 12, 40, 12, 12, 12, 18]):
+        ws.column_dimensions[col].width = width
+
+    # --- Hoja de log ---
+    ws2 = wb.create_sheet("Log validaciones")
+    ws2.append(["Fecha", "Factura", "Acción", "Detalle", "Usuario"])
+    for c in ws2[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor="4d56b0")
+    for l in log:
+        ws2.append([l.get("created_at"), l.get("factura_id"), l.get("accion"),
+                    l.get("detalle"), l.get("usuario")])
+    for col, width in zip("ABCDE", [24, 14, 14, 60, 20]):
+        ws2.column_dimensions[col].width = width
+
+    # --- Hoja resumen empresa ---
+    ws3 = wb.create_sheet("Empresa")
+    ws3.append(["Campo", "Valor"])
+    for k, v in [
+        ("Empresa", empresa.get("nombre") if empresa else ""),
+        ("NIF", empresa.get("nif") if empresa else ""),
+        ("Régimen IVA", empresa.get("regimen_iva") if empresa else ""),
+        ("Municipio", empresa.get("municipio") if empresa else ""),
+        ("Facturas", len(facturas)),
+        ("Validadas", sum(1 for f in facturas if f.get("estado") == "validada")),
+        ("Pendientes", sum(1 for f in facturas if f.get("estado") != "validada")),
+    ]:
+        ws3.append([k, v])
+    for col, width in zip("AB", [20, 40]):
+        ws3.column_dimensions[col].width = width
+
+    import io
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.read()

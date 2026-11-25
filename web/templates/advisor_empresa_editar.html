@@ -63,6 +63,33 @@
                 <option value="baja" {% if empresa.estado == 'baja' %}selected{% endif %}>Baja</option>
             </select>
         </div>
+        <div class="sm:col-span-2 lg:col-span-3">
+            <h3 class="text-sm font-semibold text-brand-400 tracking-wide uppercase mb-2">Datos de contacto</h3>
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Teléfono oficina</label>
+            <input name="telefono" value="{{ empresa.telefono or '' }}" placeholder="910 000 000" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Móvil</label>
+            <input name="movil" value="{{ empresa.movil or '' }}" placeholder="600 000 000" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Correo de contacto</label>
+            <input name="email_contacto" type="email" value="{{ empresa.email_contacto or '' }}" placeholder="info@empresa.com" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">WhatsApp</label>
+            <input name="whatsapp" value="{{ empresa.whatsapp or '' }}" placeholder="600 000 000" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Web</label>
+            <input name="web" value="{{ empresa.web or '' }}" placeholder="www.empresa.com" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Persona de contacto</label>
+            <input name="persona_contacto" value="{{ empresa.persona_contacto or '' }}" placeholder="Nombre y apellidos" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
         <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-3">
             <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Guardar cambios</button>
             <a href="/advisor/clientes" class="px-5 py-2.5 bg-surface-800 border border-border-subtle text-text-secondary hover:text-text-primary text-sm font-medium rounded-lg transition-colors">Cancelar</a>

@@ -80,6 +80,12 @@ async def crear_cliente(
     direccion: str = Form(""),
     municipio: str = Form(""),
     provincia: str = Form(""),
+    telefono: str = Form(""),
+    movil: str = Form(""),
+    email_contacto: str = Form(""),
+    whatsapp: str = Form(""),
+    web: str = Form(""),
+    persona_contacto: str = Form(""),
 ):
     await get_current_user(request)  # requiere auth
     eid = await database.crear_empresa({
@@ -88,6 +94,9 @@ async def crear_cliente(
         "regimen_iva": regimen_iva, "cnae": cnae.strip() or None,
         "direccion": direccion.strip() or None, "municipio": municipio.strip() or None,
         "provincia": provincia.strip() or None,
+        "telefono": telefono.strip() or None, "movil": movil.strip() or None,
+        "email_contacto": email_contacto.strip() or None, "whatsapp": whatsapp.strip() or None,
+        "web": web.strip() or None, "persona_contacto": persona_contacto.strip() or None,
     })
     # Generar calendario de obligaciones base (303/111/TC1 según régimen)
     await database.generar_obligaciones(eid)
@@ -125,6 +134,12 @@ async def editar_cliente(
     municipio: str = Form(""),
     provincia: str = Form(""),
     estado: str = Form("activa"),
+    telefono: str = Form(""),
+    movil: str = Form(""),
+    email_contacto: str = Form(""),
+    whatsapp: str = Form(""),
+    web: str = Form(""),
+    persona_contacto: str = Form(""),
 ):
     await get_current_user(request)
     await database.actualizar_empresa(tenant_id, {
@@ -134,6 +149,9 @@ async def editar_cliente(
         "cnae": cnae.strip() or None, "direccion": direccion.strip() or None,
         "municipio": municipio.strip() or None, "provincia": provincia.strip() or None,
         "estado": estado,
+        "telefono": telefono.strip() or None, "movil": movil.strip() or None,
+        "email_contacto": email_contacto.strip() or None, "whatsapp": whatsapp.strip() or None,
+        "web": web.strip() or None, "persona_contacto": persona_contacto.strip() or None,
     })
     return RedirectResponse(url="/advisor/clientes", status_code=303)
 

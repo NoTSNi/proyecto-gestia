@@ -28,19 +28,20 @@ Conectar la inteligencia que ya existe al producto.
 - [x] Generación automática de obligaciones al dar de alta (303, 111, TC1/TC2 según régimen y CNAE)
 - [x] Selector de empresa cliente en el chat del asesor (consulta multi-empresa)
 
-## Fase C — Ciclo de facturas con validación del cliente
+## Fase C — Ciclo de facturas con validación del cliente (✅ núcleo completado)
 
-Flujo: subida → lectura → hoja pendiente → validación del cliente → fusión + log.
+Flujo: alta → pendiente → validación del cliente (con corrección) → fusión + log + Excel.
 
-- [ ] Subida de documentos desde el portal cliente (PDF, imagen, CSV, XLSX sin macros)
-- [ ] OCR + extracción de datos (Docling): emisor, NIF, fecha, base, IVA, total, concepto
-- [ ] **Hoja "pendiente de validar"** por empresa (en BD y en el Excel exportado)
-- [ ] Notificación al cliente: "revisa y valida los datos extraídos"
-- [ ] Tras validación: fusión con la hoja principal + **registro de log** (datos aportados, quién validó, cuándo)
-- [ ] Exportación Excel por empresa: hoja principal + hoja pendiente + hoja log
-- [ ] Almacenamiento de documentos por `empresa/año/mes/` + metadatos en BD
+- [x] Alta de facturas desde el portal cliente (formulario con emisor, NIF, fecha, nº, concepto, base, IVA, total)
+- [x] **Estado "pendiente de validación"** en BD (tabla `facturas`)
+- [x] El cliente revisa y **corrige** los datos antes de validar (tabla editable)
+- [x] Validación → pasa a **validada** + **registro en log** (`log_validaciones`: quién, cuándo, qué se corrigió)
+- [x] **Exportación Excel por empresa** (openpyxl): hoja Facturas + hoja Log + hoja Empresa, botón "Descargar Excel"
+- [x] Aislamiento total por tenant verificado
+- [ ] Subida de archivos reales (PDF/imagen/XLSX) con **cuarentena + OCR** — conecta con Document Vault (Fase D)
+- [ ] Notificación al cliente al quedar datos pendientes (email/WhatsApp — Fase G)
 
-**Fuente de verdad: BD.** El Excel es el entregable/exportación para el cliente; la BD permite a los agentes consultar (PYG, IVA, TC1/TC2).
+**Decisión de diseño acordada**: la BD es la fuente de verdad; el Excel es el entregable descargable (hoja principal + log). Los agentes consultan la BD para PYG/IVA/TC1.
 
 ## Fase D — Document Vault integrado
 
@@ -51,6 +52,7 @@ Flujo: subida → lectura → hoja pendiente → validación del cliente → fus
 
 ## Fase E — Seguridad en profundidad
 
+- [ ] **Anti-hackeo de login**: bloqueo de usuario tras N intentos fallidos (p. ej. 5), con temporización creciente; desbloqueo vía restablecimiento de contraseña con 2FA o contacto con el administrador. Pendiente de diseño con el cliente.
 - [ ] **2FA (TOTP)** para cuentas de asesor/admin (obligatorio) y clientes (opcional): `pyotp`, QR, 10 códigos de recuperación. *Adelantable — argumento de venta antes de la primera visita a una asesoría.*
 - [ ] **Agente monitor de seguridad**: revisa el audit log (accesos no permitidos, login fallidos, subidas sospechosas, accesos cross-tenant) en ejecución programada y alerta a la asesoría
 - [ ] **Anti-bucle y control de coste**: presupuesto de tokens por consulta, máx. iteraciones por agente, timeout, circuit breaker
@@ -68,6 +70,7 @@ Flujo: subida → lectura → hoja pendiente → validación del cliente → fus
 
 ## Fase G — Canales y automatización reales
 
+- [ ] **Pendiente con el cliente**: revisar a fondo las secciones **Reportes** y **Comunicaciones** (qué reportes necesita la asesoría, qué canales y plantillas reales). Anotado en ROADMAP — hablar antes de implementar.
 - [ ] Chat por WhatsApp (misma lógica del chat web, transporte diferente)
 - [ ] Email real (SMTP propio, DKIM/SPF/DMARC)
 - [ ] n8n desplegado: calendario fiscal sincronizado, alertas 15/7/1 días, notificaciones multi-canal

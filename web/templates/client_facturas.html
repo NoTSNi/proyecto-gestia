@@ -2,36 +2,165 @@
 {% block title %}Facturas - GESTIA{% endblock %}
 {% block nav_items %}{% include "partials/_client_nav.html" %}{% endblock %}
 {% block page_title %}Facturas{% endblock %}
-{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+{% block header_actions %}
+<a href="/client/facturas/descargar" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">⬇ Descargar Excel</a>
+<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>
+{% endblock %}
 
 {% block content %}
 <div class="space-y-6 animate-fade-in">
-    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
-        <h2 class="text-xl font-semibold tracking-tight">Facturas</h2>
-        <p class="text-text-tertiary text-sm mt-1">{{ facturas|length }} facturas registradas</p>
-    </div>
-    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
-        <div class="divide-y divide-border-subtle">
-            {% for f in facturas %}
-            <div class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors">
-                <div class="flex items-center space-x-4 min-w-0">
-                    <div class="w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="font-medium text-text-primary truncate">{{ f.nombre }}</p>
-                        <p class="text-sm text-text-tertiary truncate">{{ f.tipo }}</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3 flex-shrink-0">
-                    {% if f.monto %}<span class="text-sm font-medium text-text-primary">{{ f.monto }}</span>{% endif %}
-                    <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">{{ f.estado }}</span>
-                </div>
+    {% if request.query_params.get('error') == 'vacio' %}
+    <div class="px-4 py-3 bg-danger-500/10 border border-danger-500/30 rounded-lg text-sm text-danger-400">Indica al menos el emisor o el concepto para registrar la factura.</div>
+    {% endif %}
+
+    <!-- Alta manual de factura -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold text-text-primary mb-1">Registrar factura</h3>
+        <p class="text-sm text-text-tertiary mb-4">Aporta los datos de la factura. Quedará <strong>pendiente de validación</strong> hasta que la confirmes en el apartado de abajo.</p>
+        <form method="post" action="/client/facturas/subir" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">Emisor</label>
+                <input name="emisor" placeholder="Proveedor SL" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
             </div>
-            {% else %}
-            <p class="px-6 py-10 text-sm text-text-tertiary">No hay facturas registradas.</p>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">NIF emisor</label>
+                <input name="nif_emisor" placeholder="B00000000" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">Fecha</label>
+                <input name="fecha_factura" type="date" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">Número</label>
+                <input name="numero" placeholder="F2025-001" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="lg:col-span-2">
+                <label class="block text-sm text-text-secondary mb-1">Concepto</label>
+                <input name="concepto" placeholder="Servicio de telefonía, materiales..." class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">Base</label>
+                <input name="base" placeholder="100,00" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">IVA</label>
+                <input name="iva" placeholder="21,00" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1">Total</label>
+                <input name="total" placeholder="121,00" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Registrar</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Pendientes de validación -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+            <h3 class="font-semibold text-text-primary">Pendientes de validación</h3>
+            <span class="px-2 py-1 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs font-medium rounded-pill">{{ pendientes|length }}</span>
+        </header>
+        {% if pendientes %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Emisor</th>
+                        <th class="px-6 py-3">Fecha</th>
+                        <th class="px-6 py-3">Concepto</th>
+                        <th class="px-6 py-3">Base</th>
+                        <th class="px-6 py-3">IVA</th>
+                        <th class="px-6 py-3">Total</th>
+                        <th class="px-6 py-3">Revisar y validar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for f in pendientes %}
+                    <tr class="hover:bg-surface-800/30 transition-colors align-top">
+                        <form method="post" action="/client/facturas/{{ f.id }}/validar">
+                        <td class="px-6 py-3"><input name="emisor" value="{{ f.emisor or '' }}" class="w-40 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3"><input name="fecha_factura" value="{{ f.fecha_factura or '' }}" class="w-28 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3"><input name="concepto" value="{{ f.concepto or '' }}" class="w-48 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3"><input name="base" value="{{ f.base or '' }}" class="w-20 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3"><input name="iva" value="{{ f.iva or '' }}" class="w-20 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3"><input name="total" value="{{ f.total or '' }}" class="w-20 px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs focus:outline-none focus:border-brand-500"></td>
+                        <td class="px-6 py-3">
+                            <button type="submit" class="px-3 py-1.5 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-lg hover:bg-success-500/30 transition-colors">✓ Validar</button>
+                        </td>
+                        </form>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="px-6 py-3 text-xs text-text-quaternary">Puedes corregir cualquier dato antes de validar. Cada validación queda registrada en el log.</p>
+        {% else %}
+        <p class="px-6 py-10 text-sm text-text-tertiary">No hay facturas pendientes de validación.</p>
+        {% endif %}
+    </section>
+
+    <!-- Validadas -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+            <h3 class="font-semibold text-text-primary">Facturas validadas</h3>
+            <span class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">{{ validadas|length }}</span>
+        </header>
+        {% if validadas %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Emisor</th>
+                        <th class="px-6 py-3">Fecha</th>
+                        <th class="px-6 py-3">Concepto</th>
+                        <th class="px-6 py-3">Base</th>
+                        <th class="px-6 py-3">IVA</th>
+                        <th class="px-6 py-3">Total</th>
+                        <th class="px-6 py-3">Validada por</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for f in validadas %}
+                    <tr class="hover:bg-surface-800/30 transition-colors">
+                        <td class="px-6 py-4 text-text-primary">{{ f.emisor or '—' }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ f.fecha_factura or '—' }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ f.concepto or '—' }}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ f.base or '—' }}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ f.iva or '—' }}</td>
+                        <td class="px-6 py-4 font-medium text-text-primary">{{ f.total or '—' }}</td>
+                        <td class="px-6 py-4 text-xs text-text-quaternary">{{ f.validado_por or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="px-6 py-10 text-sm text-text-tertiary">Aún no hay facturas validadas. Las que validas en el apartado anterior aparecen aquí.</p>
+        {% endif %}
+    </section>
+
+    <!-- Log de validaciones -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle">
+            <h3 class="font-semibold text-text-primary">Log de validaciones</h3>
+        </header>
+        {% if log %}
+        <div class="divide-y divide-border-subtle">
+            {% for l in log %}
+            <div class="px-6 py-3 flex items-center justify-between">
+                <div class="min-w-0">
+                    <p class="text-sm text-text-primary">{{ l.detalle }}</p>
+                    <p class="text-xs text-text-quaternary">{{ l.created_at[:16].replace('T', ' ') }}</p>
+                </div>
+                <span class="px-2 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs rounded-pill">{{ l.accion }}</span>
+            </div>
             {% endfor %}
         </div>
+        {% else %}
+        <p class="px-6 py-8 text-sm text-text-tertiary">Sin registros todavía.</p>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

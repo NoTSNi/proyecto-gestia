@@ -79,15 +79,72 @@ async def documentos(request: Request):
 async def facturas(request: Request):
     user, empresa = await _get_tenant_or_401(request)
     docs = await database.list_documentos(empresa["id"])
-    facturas = [d for d in docs if d["tipo"] in ("factura_recibida", "factura_emitida")]
+    facturas_old = [d for d in docs if d["tipo"] in ("factura_recibida", "factura_emitida")]
+    pendientes = await database.list_facturas(empresa["id"], estado="pendiente_validacion")
+    validadas = await database.list_facturas(empresa["id"], estado="validada")
+    log = await database.list_log_validaciones(empresa["id"])
     return await request.app.state.render_template(
         "client_facturas.html",
         {
             "request": request, "user": user, "empresa": empresa,
             "user_initials": _initials(empresa["nombre"]),
             "user_name": empresa["nombre"], "user_role": _role_label(user["rol"]),
-            "facturas": facturas, "rol": user["rol"],
+            "facturas": facturas_old, "pendientes": pendientes, "validadas": validadas,
+            "log": log, "rol": user["rol"],
         },
+    )
+
+
+@router.post("/facturas/subir")
+async def subir_factura(request: Request):
+    """Sube una factura manualmente (datos a validar por el cliente)."""
+    user, empresa = await _get_tenant_or_401(request)
+    form = await request.form()
+    datos = {
+        "emisor": str(form.get("emisor") or "").strip(),
+        "nif_emisor": str(form.get("nif_emisor") or "").strip(),
+        "fecha_factura": str(form.get("fecha_factura") or "").strip(),
+        "numero": str(form.get("numero") or "").strip(),
+        "concepto": str(form.get("concepto") or "").strip(),
+        "base": str(form.get("base") or "").strip(),
+        "iva": str(form.get("iva") or "").strip(),
+        "total": str(form.get("total") or "").strip(),
+    }
+    if not datos.get("emisor") and not datos.get("concepto"):
+        return RedirectResponse(url="/client/facturas?error=vacio", status_code=303)
+    await database.crear_factura(
+        empresa["id"], datos, creado_por=user["email"],
+        archivo_original=str(form.get("archivo_nombre") or "").strip() or None,
+    )
+    return RedirectResponse(url="/client/facturas", status_code=303)
+
+
+@router.post("/facturas/{factura_id}/validar")
+async def validar_factura_route(request: Request, factura_id: str):
+    """El cliente valida (o corrige y valida) una factura pendiente."""
+    user, empresa = await _get_tenant_or_401(request)
+    form = await request.form()
+    # Campos que el cliente puede corregir antes de validar
+    cambios = {}
+    for campo in ("emisor", "nif_emisor", "fecha_factura", "numero", "concepto", "base", "iva", "total"):
+        val = str(form.get(campo) or "").strip()
+        if val:
+            cambios[campo] = val
+    await database.validar_factura(factura_id, empresa["id"], user["email"], cambios=cambios or None)
+    return RedirectResponse(url="/client/facturas", status_code=303)
+
+
+@router.get("/facturas/descargar")
+async def descargar_excel(request: Request):
+    """Descarga el Excel de la empresa (facturas + log)."""
+    from fastapi.responses import Response
+    user, empresa = await _get_tenant_or_401(request)
+    contenido = await database.exportar_excel_empresa(empresa["id"])
+    nombre = f"GESTIA_{empresa['nif']}.xlsx"
+    return Response(
+        content=contenido,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{nombre}"'},
     )
 
 
