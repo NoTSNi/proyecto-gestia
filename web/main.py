@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from web import database
-from web.routes import advisor, api, auth, client
+from web.routes import advisor, api, auth, chat, client
 from web.security import COOKIE_NAME, decode_token
 
 
@@ -61,6 +61,7 @@ app.state.render_template = render_template
 # Rutas
 # ---------------------------------------------------------------------------
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(chat.router, prefix="/advisor", tags=["advisor"])
 app.include_router(client.router, prefix="/client", tags=["client"])
 app.include_router(advisor.router, prefix="/advisor", tags=["advisor"])
 app.include_router(api.router, prefix="/api", tags=["api"])

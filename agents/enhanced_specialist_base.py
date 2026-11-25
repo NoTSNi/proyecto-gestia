@@ -94,6 +94,7 @@ class EnhancedSpecialistBase(BaseAgent, ABC):
         self.domain = self.__class__.__name__.replace("Agent", "").lower()
         self.infra = InfrastructureClient()
         self.client_data_path = "cliente_ejemplo"
+        self._context_metadata: dict | None = None
     
     # ============================================================
     # INFRASTRUCTURE INTEGRATION
@@ -136,13 +137,27 @@ class EnhancedSpecialistBase(BaseAgent, ABC):
         return await self.infra.search_similar(query, top_k)
     
     async def get_client_context(self, tenant_id: str) -> dict:
-        """Load client context from test data or DB."""
-        # Try metadata first
+        """Load client context from database (vía context.metadata) or test data.
+
+        Prioridad:
+        1. Datos reales inyectados en `context.metadata["client_data"]` (BD, web).
+        2. Fichero `cliente_ejemplo/metadata.json` (demo/tests).
+        """
+        # Si la web puso datos reales del tenant, úsalos
+        ctx_metadata = self._context_metadata or {}
+        client_data = ctx_metadata.get("client_data")
+        if client_data:
+            return {"cliente_real": client_data, "fuente": "bd"}
+        # Fallback a datos de demostración
         meta_path = os.path.join(self.client_data_path, "metadata.json")
         if os.path.exists(meta_path):
             with open(meta_path) as f:
                 return json.load(f)
         return {}
+
+    def bind_context_metadata(self, metadata: dict) -> None:
+        """Fija metadata del contexto para usar datos reales en get_client_context()."""
+        self._context_metadata = metadata or {}
     
     # ============================================================
     # STRUCTURED RESPONSE BUILDING

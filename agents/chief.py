@@ -109,6 +109,7 @@ class ChiefAgent(BaseAgent):
         specialists: dict[str, BaseAgent] | None = None,
         policies: ChiefPolicies | None = None,
         memory: ChiefMemory | None = None,
+        client_data: dict | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -120,6 +121,11 @@ class ChiefAgent(BaseAgent):
             "contable": ContableAgent(),
             "personal": PersonalAgent(),
         }
+        # Datos reales del tenant inyectados desde la web (BD)
+        if client_data:
+            for agent in self.specialists.values():
+                if hasattr(agent, "bind_context_metadata"):
+                    agent.bind_context_metadata({"client_data": client_data})
         
         # Core components
         self.policies = policies or ChiefPolicies()
