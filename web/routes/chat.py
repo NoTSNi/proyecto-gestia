@@ -34,6 +34,24 @@ async def chat_page(request: Request):
     )
 
 
+@router.get("/consultas", response_class=HTMLResponse)
+async def historial_consultas(request: Request):
+    """Historial de consultas y respuestas del tenant (auditoría)."""
+    user = await get_current_user(request)
+    from web import database
+    registros = await database.list_consultas(tenant_id=user.get("tenant_id"), limit=100)
+    return await request.app.state.render_template(
+        "advisor_consultas.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": "Asesor",
+            "rol": user["rol"],
+            "registros": registros,
+        },
+    )
+
+
 @router.post("/chat")
 async def chat_ask(request: Request):
     """Handle a chat message and return the response as HTML partial for HTMX."""

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Historial de Consultas - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Historial de Consultas{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Registro de consultas a GESTIA</h2>
+        <p class="text-text-tertiary text-sm mt-1">Todas las preguntas y respuestas quedan registradas por tenant (auditoría). {{ registros|length }} consultas.</p>
+    </div>
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <div class="divide-y divide-border-subtle">
+            {% for r in registros %}
+            <div class="px-6 py-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-0.5 bg-surface-800 border border-border-subtle text-text-tertiary text-xs rounded-pill">{{ r.created_at[:16].replace('T', ' ') }}</span>
+                    {% if r.agente %}<span class="px-2 py-0.5 bg-brand-600/20 border border-brand-600/30 text-brand-400 text-xs rounded-pill">{{ r.agente }}</span>{% endif %}
+                    {% if not r.success %}<span class="px-2 py-0.5 bg-warning-500/20 border border-warning-500/30 text-warning-500 text-xs rounded-pill">escalada</span>{% endif %}
+                </div>
+                <p class="text-sm font-medium text-text-primary mb-1">❓ {{ r.query }}</p>
+                <p class="text-sm text-text-tertiary whitespace-pre-line">{{ r.respuesta[:300] }}{% if r.respuesta|length > 300 %}…{% endif %}</p>
+            </div>
+            {% else %}
+            <p class="px-6 py-10 text-sm text-text-tertiary">Aún no hay consultas registradas. Pregunta a GESTIA desde el chat.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

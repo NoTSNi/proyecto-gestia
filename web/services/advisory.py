@@ -12,6 +12,9 @@ from typing import Optional
 from agents.base_agent import AgentContext
 from agents.chief import ChiefAgent
 
+from web import database as database
+from web.database import registrar_consulta as database_registrar_consulta
+
 
 async def cargar_client_data(tenant_id: str) -> dict:
     """Compone el contexto real del cliente desde la BD."""
@@ -72,6 +75,17 @@ async def consultar_gestia(
     context.metadata["client_data"] = client_data
 
     result = await chief.process(query, context)
+
+    # Registrar la consulta y su respuesta (auditoría por tenant)
+    await database_registrar_consulta(
+        tenant_id=tenant_id,
+        user_id=user_id,
+        query=query,
+        respuesta=result.response,
+        agente=result.agent,
+        strategy=None,
+        success=result.success,
+    )
 
     response = {
         "query": query,

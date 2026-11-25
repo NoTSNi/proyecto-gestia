@@ -87,6 +87,19 @@ CREATE TABLE IF NOT EXISTS calendario_eventos (
     fecha       TEXT NOT NULL,
     FOREIGN KEY (tenant_id) REFERENCES empresas(id)
 );
+
+CREATE TABLE IF NOT EXISTS consultas (
+    id         TEXT PRIMARY KEY,
+    tenant_id  TEXT NOT NULL,
+    user_id    TEXT NOT NULL,
+    query      TEXT NOT NULL,
+    respuesta  TEXT NOT NULL,
+    agente     TEXT,
+    strategy   TEXT,
+    success    INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
 """
 
 _demo_empresas = [
@@ -372,5 +385,47 @@ async def get_usuario_by_email(email: str) -> dict | None:
         cur = await conn.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
         row = await cur.fetchone()
         return dict(row) if row else None
+    finally:
+        await conn.close()
+
+
+async def registrar_consulta(
+    tenant_id: str,
+    user_id: str,
+    query: str,
+    respuesta: str,
+    agente: str | None = None,
+    strategy: str | None = None,
+    success: bool = True,
+) -> None:
+    """Registra una consulta y su respuesta (auditoría por tenant)."""
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """INSERT INTO consultas (id, tenant_id, user_id, query, respuesta, agente, strategy, success, created_at)
+            VALUES (?,?,?,?,?,?,?,?,?)""",
+            (_new_id(), tenant_id, user_id, query, respuesta, agente, strategy,
+             1 if success else 0, _now()),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def list_consultas(tenant_id: str | None = None, limit: int = 100) -> list[dict]:
+    """Consulta el histórico de preguntas/respuestas (filtrado por tenant)."""
+    conn = await get_db()
+    try:
+        if tenant_id:
+            cur = await conn.execute(
+                "SELECT * FROM consultas WHERE tenant_id = ? ORDER BY created_at DESC LIMIT ?",
+                (tenant_id, limit),
+            )
+        else:
+            cur = await conn.execute(
+                "SELECT * FROM consultas ORDER BY created_at DESC LIMIT ?", (limit,)
+            )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
     finally:
         await conn.close()

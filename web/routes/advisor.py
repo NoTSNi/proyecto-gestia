@@ -95,7 +95,7 @@ async def crear_cliente(
 @router.get("/tareas", response_class=HTMLResponse)
 async def tareas(request: Request):
     user = await get_current_user(request)
-    return _simple_render(request, user, "advisor_tareas.html")
+    return await _simple_render(request, user, "advisor_tareas.html")
 
 
 @router.get("/documentos", response_class=HTMLResponse)
@@ -139,13 +139,13 @@ async def calendario(request: Request):
 @router.get("/comunicaciones", response_class=HTMLResponse)
 async def comunicaciones(request: Request):
     user = await get_current_user(request)
-    return _simple_render(request, user, "advisor_comunicaciones.html")
+    return await _simple_render(request, user, "advisor_comunicaciones.html")
 
 
 @router.get("/reportes", response_class=HTMLResponse)
 async def reportes(request: Request):
     user = await get_current_user(request)
-    return _simple_render(request, user, "advisor_reportes.html")
+    return await _simple_render(request, user, "advisor_reportes.html")
 
 
 async def _simple_render(request: Request, user: dict, template_name: str):
