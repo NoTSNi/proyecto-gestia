@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Reportes - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Reportes{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Reportes y estadísticas</h2>
+        <p class="text-text-tertiary text-sm mt-1">Resumen consolidado del despacho</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Empresas activas</p>
+            <p class="text-3xl font-semibold text-text-primary">—</p>
+            <p class="text-xs text-text-tertiary mt-1">Disponible en dashboard</p>
+        </article>
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Vencimientos</p>
+            <p class="text-3xl font-semibold text-text-primary">—</p>
+            <p class="text-xs text-text-tertiary mt-1">Ver Calendario</p>
+        </article>
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6">
+            <p class="text-xs font-medium text-text-quaternary uppercase mb-2">Documentos</p>
+            <p class="text-3xl font-semibold text-text-primary">—</p>
+            <p class="text-xs text-text-tertiary mt-1">Ver Documentos</p>
+        </article>
+    </div>
+</div>
+{% endblock %}

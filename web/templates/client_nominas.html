@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Nóminas - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_client_nav.html" %}{% endblock %}
+{% block page_title %}Nóminas{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Nóminas y Personal</h2>
+        <p class="text-text-tertiary text-sm mt-1">{{ nominas|length }} registros</p>
+    </div>
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <div class="divide-y divide-border-subtle">
+            {% for n in nominas %}
+            <div class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors">
+                <div class="flex items-center space-x-4 min-w-0">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-medium text-text-primary truncate">{{ n.nombre }}</p>
+                        <p class="text-sm text-text-tertiary truncate">{{ n.tipo }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                    {% if n.monto %}<span class="text-sm font-medium text-text-primary">{{ n.monto }}</span>{% endif %}
+                    <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/30 text-purple-400 text-xs font-medium rounded-pill">{{ n.estado }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="px-6 py-10 text-sm text-text-tertiary">No hay nóminas registradas.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

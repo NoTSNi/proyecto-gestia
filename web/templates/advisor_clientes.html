@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Empresas - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Empresas clientes{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <!-- Alta de empresa (multi-tenant) -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold text-text-primary mb-4">Dar de alta una empresa (tenant)</h3>
+        <form method="post" action="/advisor/clientes/nuevo" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">NIF (obligatorio)</label>
+                <input name="nif" required placeholder="B12345678" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Razón social (obligatorio)</label>
+                <input name="nombre" required placeholder="Empresa SL" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Nombre comercial</label>
+                <input name="nombre_comercial" placeholder="Empresa" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Régimen IVA</label>
+                <select name="regimen_iva" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                    <option value="general">General</option>
+                    <option value="simplificado">Simplificado</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">CNAE</label>
+                <input name="cnae" placeholder="6201" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Municipio</label>
+                <input name="municipio" placeholder="Madrid" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Provincia</label>
+                <input name="provincia" placeholder="Madrid" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Dirección</label>
+                <input name="direccion" placeholder="Calle..." class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="sm:col-span-2 lg:col-span-4">
+                <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Crear empresa</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Listado -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle">
+            <h3 class="font-semibold text-text-primary">{{ empresas|length }} empresas</h3>
+        </header>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Empresa</th>
+                        <th class="px-6 py-3">NIF</th>
+                        <th class="px-6 py-3">Régimen</th>
+                        <th class="px-6 py-3">Ubicación</th>
+                        <th class="px-6 py-3">Usuarios</th>
+                        <th class="px-6 py-3">Docs</th>
+                        <th class="px-6 py-3">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for e in empresas %}
+                    <tr class="hover:bg-surface-800/30 transition-colors" data-nav-tenant="{{ e.id }}">
+                        <td class="px-6 py-4 font-medium text-text-primary">{{ e.nombre }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ e.nif }}</td>
+                        <td class="px-6 py-4 text-text-tertiary capitalize">{{ e.regimen_iva }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ e.municipio or '—' }}{% if e.provincia %}, {{ e.provincia }}{% endif %}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ conteo.get(e.id, {}).get('usuarios', 0) }}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ conteo.get(e.id, {}).get('documentos', 0) }}</td>
+                        <td class="px-6 py-4"><span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill capitalize">{{ e.estado }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td class="px-6 py-10 text-text-tertiary">No hay empresas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

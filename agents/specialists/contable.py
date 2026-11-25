@@ -42,11 +42,16 @@ class ContableAgent(EnhancedSpecialistBase):
     }
 
     def can_handle(self, query: str) -> float:
+        import re
         query_lower = query.lower()
         matches = 0
         for cat, kws in self.KEYWORDS.items():
-            matches += sum(1 for kw in kws if kw in query_lower)
-        return min(0.97, 0.4 + matches * 0.1)
+            for kw in kws:
+                pattern = r"" + re.escape(kw) + r""
+                if re.search(pattern, query_lower):
+                    matches += 1
+                    break
+        return min(0.97, 0.4 + matches * 0.12)
 
     async def analyze(self, query: str, context: AgentContext) -> dict:
         query_lower = query.lower()

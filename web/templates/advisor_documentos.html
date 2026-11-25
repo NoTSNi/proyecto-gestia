@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Documentos - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Documentos de todas las empresas{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Expedientes de clientes</h2>
+        <p class="text-text-tertiary text-sm mt-1">{{ documentos|length }} documentos en total</p>
+    </div>
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Empresa</th>
+                        <th class="px-6 py-3">Documento</th>
+                        <th class="px-6 py-3">Tipo</th>
+                        <th class="px-6 py-3">Monto</th>
+                        <th class="px-6 py-3">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for d in documentos %}
+                    <tr class="hover:bg-surface-800/30 transition-colors">
+                        <td class="px-6 py-4 text-text-secondary">{{ d.empresa_nombre }}</td>
+                        <td class="px-6 py-4 font-medium text-text-primary">{{ d.nombre }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ d.tipo }}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ d.monto or '—' }}</td>
+                        <td class="px-6 py-4"><span class="px-3 py-1 bg-surface-800 border border-border-subtle text-text-tertiary text-xs rounded-pill">{{ d.estado }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="px-6 py-10 text-text-tertiary">No hay documentos.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

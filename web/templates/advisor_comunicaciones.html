@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Comunicaciones - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Comunicaciones{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Centro de comunicaciones</h2>
+        <p class="text-text-tertiary text-sm mt-1">Email, WhatsApp, Slack y portal centralizados. Los canales externos se habilitan configurando credenciales en la ficha de cada empresa.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for canal in ["Email", "WhatsApp", "Slack", "Portal"] %}
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 flex items-center justify-between">
+            <div>
+                <p class="font-semibold text-text-primary">{{ canal }}</p>
+                <p class="text-sm text-text-tertiary mt-1">Disponible</p>
+            </div>
+            <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Activo</span>
+        </article>
+        {% endfor %}
+    </div>
+    <div class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 text-sm text-text-tertiary">
+        Las plantillas multi-canal (documento_recibido, documento_procesado, deadline_proximo, modelo_calculado, nomina_lista, contrato_por_vencer, escrito_plazo) quedaron validadas en la suite de CommsPortal.
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Facturas - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_client_nav.html" %}{% endblock %}
+{% block page_title %}Facturas{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">Facturas</h2>
+        <p class="text-text-tertiary text-sm mt-1">{{ facturas|length }} facturas registradas</p>
+    </div>
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <div class="divide-y divide-border-subtle">
+            {% for f in facturas %}
+            <div class="px-6 py-4 flex items-center justify-between hover:bg-surface-800/30 transition-colors">
+                <div class="flex items-center space-x-4 min-w-0">
+                    <div class="w-10 h-10 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-medium text-text-primary truncate">{{ f.nombre }}</p>
+                        <p class="text-sm text-text-tertiary truncate">{{ f.tipo }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                    {% if f.monto %}<span class="text-sm font-medium text-text-primary">{{ f.monto }}</span>{% endif %}
+                    <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">{{ f.estado }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="px-6 py-10 text-sm text-text-tertiary">No hay facturas registradas.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
