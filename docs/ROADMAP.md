@@ -14,7 +14,7 @@ Conectar la inteligencia que ya existe al producto.
 - [x] Los 4 especialistas leen de la BD real (empresas, documentos, calendario, usuarios) en vez de contexto fijo
 - [x] Respuesta estructurada: plan de acción, documentos necesarios, fechas, fuentes, confianza
 - [x] Control de calidad del supervisor (score ≥ 0.7) y auto-escalación por palabras críticas (inspección, demanda, embargo, fallecimiento)
-- [ ] Historial de conversaciones por tenant (persistido) — pendiente
+- [x] Historial de conversaciones por tenant (persistido) — tabla `consultas` + vista `/advisor/consultas`
 - [ ] Selector de empresa cliente para el asesor (Fase B habilita el multi-empresa en el chat)
 
 **Definición de "hecho"**: un asesor pregunta "¿qué tiene que presentar Tech Solutions este trimestre?" y recibe una respuesta razonada con datos reales de la BD.
