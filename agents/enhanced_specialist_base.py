@@ -133,7 +133,26 @@ class EnhancedSpecialistBase(BaseAgent, ABC):
         return chunks
     
     async def search_knowledge(self, query: str, top_k: int = 5) -> list[dict]:
-        """Search relevant documents from vector store."""
+        """Busca en la KB curada del dominio (Fase F), con fallback al vector store.
+
+        Primero consulta la base de conocimiento local del especialista
+        (contable/mercantil/personal/administrativo). Si no hay resultados o
+        el servicio externo está disponible, vuelve al vector store.
+        """
+        from agents.knowledge_base import KB_INSTANCE
+        resultados = KB_INSTANCE.buscar(self.domain, query, top_k=top_k)
+        if resultados:
+            return [
+                {
+                    "titulo": r["titulo"],
+                    "texto": r["texto"],
+                    "fuentes": r.get("fuentes", []),
+                    "vigente_desde": r.get("vigente_desde"),
+                    "fuente": "kb_curated",
+                }
+                for r in resultados
+            ]
+        # Fallback: vector store externo
         return await self.infra.search_similar(query, top_k)
     
     async def get_client_context(self, tenant_id: str) -> dict:
@@ -234,9 +253,50 @@ class EnhancedSpecialistBase(BaseAgent, ABC):
         """Main entry point - analyze and execute."""
         try:
             analysis = await self.analyze(query, context)
-            return await self.execute(analysis, query, context)
+            response = await self.execute(analysis, query, context)
+            # Fase F: enriquecer con conocimiento curado del dominio (citas + fuentes)
+            if response.success:
+                await self._enrich_with_kb(query, response)
+            return response
         except Exception as e:
             return self.build_error_response(str(e))
+
+    async def _enrich_with_kb(self, query: str, response: AgentResponse) -> None:
+        """Añade al response las referencias de la KB curada del dominio (Fase F).
+
+        Consulta el conocimiento local (contable/mercantil/personal/administrativo)
+        relacionado con la consulta y lo incorpora como 'kb_references' en data, más
+        una leyenda '⚖ Referencia normativa' al final de la respuesta humana.
+        No altera la acción principal; solo aporta contexto normativo.
+        """
+        try:
+            from agents.knowledge_base import KB_INSTANCE
+            refs = KB_INSTANCE.buscar(self.domain, query, top_k=3)
+            if not refs:
+                return
+            kb_datos = [
+                {
+                    "titulo": r["titulo"],
+                    "fuentes": r.get("fuentes", []),
+                    "texto": r["texto"],
+                    "vigente_desde": r.get("vigente_desde"),
+                }
+                for r in refs
+            ]
+            if response.data is None:
+                response.data = {}
+            response.data["kb_references"] = kb_datos
+            # Leyenda normativa al final
+            if not response.response.endswith("\n\n"):
+                response.response += "\n"
+            for r in refs:
+                fuentes = ", ".join(r.get("fuentes", []))
+                response.response += (
+                    f"\n⚖ **{r['titulo']}** — {fuentes}"
+                )
+        except Exception:
+            # El enriquecimiento nunca debe romper la respuesta
+            pass
     
     @abstractmethod
     async def execute(self, analysis: dict, query: str, context: AgentContext) -> AgentResponse:

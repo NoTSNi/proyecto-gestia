@@ -33,6 +33,9 @@ async def dashboard(request: Request):
     user = await get_current_user(request)
     empresas = await database.list_empresas()
     usuarios = await database.list_usuarios()
+    # Fase F: alertas proactivas de beneficios fiscales por empresa
+    from web.services.beneficios import detectar_beneficios_todas
+    alertas = await detectar_beneficios_todas(empresas)
     return await request.app.state.render_template(
         "advisor_dashboard.html",
         {
@@ -40,6 +43,7 @@ async def dashboard(request: Request):
             "user_initials": _initials(user["full_name"]),
             "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
             "empresas": empresas, "usuarios": usuarios, "rol": user["rol"],
+            "alertas_beneficios": alertas,
             "onboarding": True,
         },
     )

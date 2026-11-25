@@ -37,6 +37,31 @@
         </article>
     </div>
 
+    <!-- Alertas de beneficios fiscales (Fase F) -->
+    {% if alertas_beneficios %}
+    <section class="bg-surface-900/50 border border-brand-500/30 rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle bg-brand-600/10">
+            <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-brand-400">💡 Oportunidades fiscales detectadas</h3>
+                <span class="px-2 py-1 bg-brand-600/20 border border-brand-600/30 text-brand-400 text-xs font-medium rounded-pill">{{ alertas_beneficios|length }}</span>
+            </div>
+        </header>
+        <div class="divide-y divide-border-subtle">
+            {% for a in alertas_beneficios %}
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <p class="font-medium text-text-primary">{{ a.empresa_nombre }} — <span class="text-brand-400">{{ a.beneficio }}</span></p>
+                    <a href="#" class="px-3 py-1.5 bg-surface-800 border border-border-subtle text-text-secondary text-xs font-medium rounded-lg transition-colors">Revisar</a>
+                </div>
+                <p class="text-sm text-text-tertiary mt-1">{{ a.razon }}</p>
+                <p class="text-xs text-text-quaternary mt-1">Fuentes: {{ a.fuentes|join(', ') }} · {{ a.accion }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <p class="px-6 py-3 text-xs text-text-quaternary border-t border-border-subtle">Recomendaciones con fuentes. La asesoría confirma elegibilidad antes de aplicar. (El agente propone, la asesoría decide.)</p>
+    </section>
+    {% endif %}
+
     <!-- Empresas recientes -->
     <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
         <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">

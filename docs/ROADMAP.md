@@ -62,17 +62,22 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [x] **Agente monitor de seguridad**: barrido del audit log (ráfagas de logins fallidos, cuentas bloqueadas, 2FA fallidos, cambios 2FA) → informe + resumen; panel `/advisor/seguridad` con botón "Ejecutar barrido".
 - [x] **Auditoría de seguridad**: tabla `audit_seguridad` (tipo, detalle, tenant, usuario, IP, severidad) para toda acción sensible.
 - [x] **Anti-bucle y control de coste**: `agents/cost_control.py` — `AgentBudget` con límite de tokens por consulta, máx. iteraciones de descomposición, máx. subtareas, timeout global (`asyncio.timeout`); el ChiefAgent gasta tokens en cada operación y corta (devuelve error controlado) si se excede; informe de coste visible en el chat.
-- [ ] **Model routing**: mejor modelo por tarea (router barato/rápido, razonamiento potente, mecánico sin LLM); configurable por agente vía OpenRouter.
+- [x] **Model routing**: `agents/model_routing.py` — mejor modelo por tarea/dominio, configurable por entorno; tareas mecánicas SIN LLM. (Conexión con LLM real pendiente en Fase H.)
 - [ ] Alertas automatizadas del monitor (email/WhatsApp — Fase G).
 
-## Fase F — Bases de conocimiento por especialista (RAG curado)
+## Fase F — Bases de conocimiento por especialista (RAG curado) (✅ núcleo completado)
 
-- [ ] KB Contable: modelos AEAT (303, 390, 200, 111, 190, 347, 349...), cómo redactarlos, cuándo presentarlos, beneficios fiscales y requisitos
-- [ ] KB Mercantil: constitución, juntas, libros, disolución, depósito de cuentas
-- [ ] KB Laboral: nóminas, contratos, TC1/TC2, altas/bajas SS, PRL, IRPF
-- [ ] KB Administrativo: licencias, subvenciones, recursos, contratación pública
-- [ ] Detección proactiva: "a este cliente le falta requisito X para el beneficio Y" → alerta a la asesoría
-- [ ] Fuentes oficiales + versionado + fecha de vigencia. **El agente propone, la asesoría firma.**
+- [x] **KB curada por dominio** en `agents/knowledge_base.py` (FTS5 local, sin servicios externos):
+  - Contable: modelos 303/390/200/111/347/349, cierre contable, beneficios I+D, reserva capitalización, TC1/TC2
+  - Mercantil: constitución, juntas, libros, depósito cuentas, disolución, ampliación/reducción capital
+  - Laboral: tipos de contrato, nómina, IRPF retenciones, altas/bajas SS, PRL
+  - Administrativo: licencias, subvenciones, recursos, contratación pública, expedientes sancionadores
+- [x] **Cada agente consulta su KB** y añade citas normativas (⚖ + fuentes) a sus respuestas vía `_enrich_with_kb`
+- [x] **Model routing** en `agents/model_routing.py`: mejor modelo por tarea/dominio, configurable por entorno; tareas mecánicas SIN LLM. (Pendiente conectarlo al LLM real en Fase H.)
+- [x] **Detección proactiva de beneficios fiscales** (`web/services/beneficios.py`): analiza cada empresa y alerta a la asesoría (I+D, sector tecnológico/energético) — mostrado en el dashboard del asesor, con fuentes
+- [x] Fuentes + fecha de vigencia en cada entrada; **el agente propone, la asesoría decide**
+- [ ] Integrar con LLM real (RAG semántico con embeddings + modelo por agente) — Fase H
+- [ ] KB actualizable / versionable en el panel (CRUD de conocimiento)
 
 ## Fase G — Canales y automatización reales
 
