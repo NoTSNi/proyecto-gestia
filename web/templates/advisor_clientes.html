@@ -67,6 +67,7 @@
                         <th class="px-6 py-3">Usuarios</th>
                         <th class="px-6 py-3">Docs</th>
                         <th class="px-6 py-3">Estado</th>
+                        <th class="px-6 py-3">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border-subtle">
@@ -78,7 +79,27 @@
                         <td class="px-6 py-4 text-text-tertiary">{{ e.municipio or '—' }}{% if e.provincia %}, {{ e.provincia }}{% endif %}</td>
                         <td class="px-6 py-4 text-text-secondary">{{ conteo.get(e.id, {}).get('usuarios', 0) }}</td>
                         <td class="px-6 py-4 text-text-secondary">{{ conteo.get(e.id, {}).get('documentos', 0) }}</td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill capitalize">{{ e.estado }}</span></td>
+                        <td class="px-6 py-4">
+                            {% if e.estado == 'baja' %}
+                            <span class="px-3 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-400 text-xs font-medium rounded-pill capitalize">{{ e.estado }}</span>
+                            {% else %}
+                            <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill capitalize">{{ e.estado }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <a href="/advisor/clientes/{{ e.id }}/editar" class="px-3 py-1.5 bg-surface-800 border border-border-subtle hover:border-brand-500/40 text-text-secondary hover:text-text-primary text-xs font-medium rounded-lg transition-colors">Editar</a>
+                                {% if e.estado == 'baja' %}
+                                <form method="post" action="/advisor/clientes/{{ e.id }}/reactivar" class="inline">
+                                    <button type="submit" class="px-3 py-1.5 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-lg hover:bg-success-500/30 transition-colors">Reactivar</button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="/advisor/clientes/{{ e.id }}/baja" class="inline" onsubmit="return confirm('¿Dar de baja a {{ e.nombre }}? El histórico se conserva.');">
+                                    <button type="submit" class="px-3 py-1.5 bg-danger-500/10 border border-danger-500/30 text-danger-400 text-xs font-medium rounded-lg hover:bg-danger-500/20 transition-colors">Baja</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
                     </tr>
                     {% else %}
                     <tr><td class="px-6 py-10 text-text-tertiary">No hay empresas registradas.</td></tr>

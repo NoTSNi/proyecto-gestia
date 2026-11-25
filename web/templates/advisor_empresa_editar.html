@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Editar Empresa - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Editar empresa{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h2 class="text-xl font-semibold tracking-tight">{{ empresa.nombre }}</h2>
+        <p class="text-text-tertiary text-sm mt-1">Modifica los datos de la empresa cliente (tenant). El cambio de régimen regenera las obligaciones fiscales si no existen.</p>
+    </div>
+
+    <form method="post" action="/advisor/clientes/{{ empresa.id }}/editar" class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">NIF</label>
+            <input name="nif" value="{{ empresa.nif }}" required class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Razón social</label>
+            <input name="nombre" value="{{ empresa.nombre }}" required class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Nombre comercial</label>
+            <input name="nombre_comercial" value="{{ empresa.nombre_comercial or '' }}" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Régimen IVA</label>
+            <select name="regimen_iva" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                <option value="general" {% if empresa.regimen_iva == 'general' %}selected{% endif %}>General</option>
+                <option value="simplificado" {% if empresa.regimen_iva == 'simplificado' %}selected{% endif %}>Simplificado</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Periodicidad IVA</label>
+            <select name="periodicidad_iva" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                <option value="trimestral" {% if empresa.periodicidad_iva == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                <option value="mensual" {% if empresa.periodicidad_iva == 'mensual' %}selected{% endif %}>Mensual</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">CNAE</label>
+            <input name="cnae" value="{{ empresa.cnae or '' }}" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Dirección</label>
+            <input name="direccion" value="{{ empresa.direccion or '' }}" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Municipio</label>
+            <input name="municipio" value="{{ empresa.municipio or '' }}" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Provincia</label>
+            <input name="provincia" value="{{ empresa.provincia or '' }}" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+            <label class="block text-sm text-text-secondary mb-1.5">Estado</label>
+            <select name="estado" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                <option value="activa" {% if empresa.estado == 'activa' %}selected{% endif %}>Activa</option>
+                <option value="inactiva" {% if empresa.estado == 'inactiva' %}selected{% endif %}>Inactiva</option>
+                <option value="en_constitucion" {% if empresa.estado == 'en_constitucion' %}selected{% endif %}>En constitución</option>
+                <option value="baja" {% if empresa.estado == 'baja' %}selected{% endif %}>Baja</option>
+            </select>
+        </div>
+        <div class="sm:col-span-2 lg:col-span-3 flex items-center gap-3">
+            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Guardar cambios</button>
+            <a href="/advisor/clientes" class="px-5 py-2.5 bg-surface-800 border border-border-subtle text-text-secondary hover:text-text-primary text-sm font-medium rounded-lg transition-colors">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -28,6 +28,14 @@
 
         <form id="chat-form" hx-post="/chat" hx-target="#chat-history" hx-swap="beforeend"
               hx-indicator="#chat-loading" class="p-4 border-t border-border-subtle">
+            <div class="flex gap-3 mb-3">
+                <select id="chat-tenant" name="tenant_id" class="px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary text-sm focus:outline-none focus:border-brand-500">
+                    {% for e in empresas %}
+                    <option value="{{ e.id }}">{{ e.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <span class="self-center text-xs text-text-quaternary">Empresa sobre la que consultas</span>
+            </div>
             <div class="flex gap-3">
                 <input id="chat-input" name="query" type="text" autocomplete="off" required autofocus
                        placeholder="Escribe tu consulta fiscal, laboral, mercantil o administrativa..."

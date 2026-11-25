@@ -23,6 +23,8 @@ def _initials(name: str) -> str:
 @router.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
     user = await get_current_user(request)
+    from web import database
+    empresas = await database.list_empresas()
     return await request.app.state.render_template(
         "advisor_chat.html",
         {
@@ -30,6 +32,8 @@ async def chat_page(request: Request):
             "user_initials": _initials(user["full_name"]),
             "user_name": user["full_name"], "user_role": "Asesor",
             "rol": user["rol"],
+            "empresas": empresas,
+            "tenant_seleccionada": None,
         },
     )
 
@@ -70,6 +74,14 @@ async def chat_ask(request: Request):
         return HTMLResponse(
             "<p class='text-danger-400 text-sm'>Tu usuario no tiene empresa asignada. Contacta con el administrador.</p>"
         )
+
+    # Selector de empresa: el asesor puede consultar sobre cualquier tenant
+    tenant_sel = str(form.get("tenant_id") or "").strip()
+    if tenant_sel:
+        from web import database
+        empresa = await database.get_empresa(tenant_sel)
+        if empresa:  # solo aceptar tenants que existen
+            tenant_id = tenant_sel
 
     result = await consultar_gestia(query, tenant_id=tenant_id, user_id=user["id"])
 

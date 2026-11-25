@@ -357,17 +357,19 @@ async def list_usuarios(tenant_id: str | None = None) -> list[dict]:
         await conn.close()
 
 
-async def crear_empresa(data: dict) -> None:
+async def crear_empresa(data: dict) -> str:
+    """Crea una empresa (tenant) y devuelve su id."""
     conn = await get_db()
     try:
         now = _now()
+        eid = _new_id()
         await conn.execute(
             """INSERT INTO empresas
             (id, nif, nombre, nombre_comercial, regimen_iva, periodicidad_iva,
              cnae, estado, direccion, municipio, provincia, metadata_json, created_at, updated_at)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                _new_id(), data.get("nif", ""), data.get("nombre", ""),
+                eid, data.get("nif", ""), data.get("nombre", ""),
                 data.get("nombre_comercial"), data.get("regimen_iva", "general"),
                 data.get("periodicidad_iva", "trimestral"), data.get("cnae"),
                 data.get("estado", "activa"), data.get("direccion"),
@@ -375,6 +377,7 @@ async def crear_empresa(data: dict) -> None:
             ),
         )
         await conn.commit()
+        return eid
     finally:
         await conn.close()
 
@@ -385,6 +388,152 @@ async def get_usuario_by_email(email: str) -> dict | None:
         cur = await conn.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
         row = await cur.fetchone()
         return dict(row) if row else None
+    finally:
+        await conn.close()
+
+
+async def actualizar_empresa(tenant_id: str, data: dict) -> None:
+    """Actualiza los datos editables de una empresa (tenant)."""
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """UPDATE empresas SET
+                nif = ?, nombre = ?, nombre_comercial = ?, regimen_iva = ?,
+                periodicidad_iva = ?, cnae = ?, direccion = ?, municipio = ?,
+                provincia = ?, estado = ?, updated_at = ?
+            WHERE id = ?""",
+            (
+                data.get("nif", ""), data.get("nombre", ""),
+                data.get("nombre_comercial"), data.get("regimen_iva", "general"),
+                data.get("periodicidad_iva", "trimestral"), data.get("cnae"),
+                data.get("direccion"), data.get("municipio"), data.get("provincia"),
+                data.get("estado", "activa"), _now(), tenant_id,
+            ),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def cambiar_estado_empresa(tenant_id: str, estado: str) -> None:
+    """Baja lógica / reactivación de una empresa (estado: baja|inactiva|activa)."""
+    conn = await get_db()
+    try:
+        await conn.execute(
+            "UPDATE empresas SET estado = ?, updated_at = ? WHERE id = ?",
+            (estado, _now(), tenant_id),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def crear_usuario(
+    email: str,
+    password: str,
+    full_name: str,
+    rol: str,
+    tenant_id: str | None,
+) -> None:
+    """Da de alta un usuario con rol (para la asesoría o un cliente)."""
+    conn = await get_db()
+    try:
+        now = _now()
+        await conn.execute(
+            """INSERT INTO usuarios
+            (id, email, password_hash, full_name, rol, tenant_id, activo, created_at, updated_at)
+            VALUES (?,?,?,?,?,?,1,?,?)""",
+            (_new_id(), email.strip().lower(), hash_password(password),
+             full_name.strip(), rol, tenant_id, now, now),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def actualizar_usuario(usuario_id: str, full_name: str | None = None,
+                             rol: str | None = None) -> None:
+    """Actualiza nombre y/o rol de un usuario."""
+    conn = await get_db()
+    try:
+        sets, params = [], []
+        if full_name is not None:
+            sets.append("full_name = ?")
+            params.append(full_name)
+        if rol is not None:
+            sets.append("rol = ?")
+            params.append(rol)
+        if not sets:
+            return
+        sets.append("updated_at = ?")
+        params.append(_now())
+        params.append(usuario_id)
+        await conn.execute(f"UPDATE usuarios SET {', '.join(sets)} WHERE id = ?", params)
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def cambiar_estado_usuario(usuario_id: str, activo: bool) -> None:
+    """Activa/desactiva un usuario (baja lógica)."""
+    conn = await get_db()
+    try:
+        await conn.execute(
+            "UPDATE usuarios SET activo = ?, updated_at = ? WHERE id = ?",
+            (1 if activo else 0, _now(), usuario_id),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+# Obligaciones fiscales base por régimen (se generan al dar de alta una empresa)
+_OBLIGACIONES_BASE = {
+    "general": [
+        ("Modelo 303 - IVA trimestral", "Presentación IVA (cuatrimestral)", "fiscal"),
+        ("Modelo 111 - Retenciones IRPF", "Retenciones IRPF (trimestral)", "fiscal"),
+        ("TC1/TC2 - Seguridad Social", "Cotizaciones mensuales SS", "laboral"),
+    ],
+    "simplificado": [
+        ("Modelo 303 - IVA simplificado", "Presentación IVA (cuatrimestral)", "fiscal"),
+        ("Modelo 111 - Retenciones IRPF", "Retenciones IRPF (trimestral)", "fiscal"),
+        ("TC1/TC2 - Seguridad Social", "Cotizaciones mensuales SS", "laboral"),
+    ],
+}
+
+
+async def generar_obligaciones(tenant_id: str) -> int:
+    """Genera el calendario de obligaciones base para una empresa nueva.
+
+    Devuelve el número de obligaciones creadas. Idempotente: si ya existen
+    eventos de tipo 'fiscal'/'laboral' para el tenant, no duplica.
+    """
+    conn = await get_db()
+    try:
+        empresa = await get_empresa(tenant_id)
+        if not empresa:
+            return 0
+        regimen = empresa.get("regimen_iva", "general")
+        obligaciones = _OBLIGACIONES_BASE.get(regimen, _OBLIGACIONES_BASE["general"])
+
+        cur = await conn.execute(
+            "SELECT COUNT(*) c FROM calendario_eventos WHERE tenant_id = ? AND tipo IN ('fiscal','laboral')",
+            (tenant_id,),
+        )
+        row = await cur.fetchone()
+        if row and row["c"] > 0:
+            return 0  # ya generadas
+
+        creadas = 0
+        for titulo, desc, tipo in obligaciones:
+            await conn.execute(
+                """INSERT INTO calendario_eventos (id, tenant_id, titulo, descripcion, tipo, fecha)
+                VALUES (?,?,?,?,?,?)""",
+                (_new_id(), tenant_id, titulo, desc, tipo, _now()[:10]),
+            )
+            creadas += 1
+        await conn.commit()
+        return creadas
     finally:
         await conn.close()
 

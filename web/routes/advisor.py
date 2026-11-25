@@ -82,14 +82,136 @@ async def crear_cliente(
     provincia: str = Form(""),
 ):
     await get_current_user(request)  # requiere auth
-    await database.crear_empresa({
+    eid = await database.crear_empresa({
         "nif": nif.strip(), "nombre": nombre.strip(),
         "nombre_comercial": nombre_comercial.strip() or None,
         "regimen_iva": regimen_iva, "cnae": cnae.strip() or None,
         "direccion": direccion.strip() or None, "municipio": municipio.strip() or None,
         "provincia": provincia.strip() or None,
     })
+    # Generar calendario de obligaciones base (303/111/TC1 según régimen)
+    await database.generar_obligaciones(eid)
     return RedirectResponse(url="/advisor/clientes", status_code=303)
+
+
+@router.get("/clientes/{tenant_id}/editar", response_class=HTMLResponse)
+async def editar_cliente_page(request: Request, tenant_id: str):
+    user = await get_current_user(request)
+    empresa = await database.get_empresa(tenant_id)
+    if not empresa:
+        return RedirectResponse(url="/advisor/clientes", status_code=303)
+    return await request.app.state.render_template(
+        "advisor_empresa_editar.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "empresa": empresa, "rol": user["rol"],
+        },
+    )
+
+
+@router.post("/clientes/{tenant_id}/editar")
+async def editar_cliente(
+    request: Request,
+    tenant_id: str,
+    nif: str = Form(...),
+    nombre: str = Form(...),
+    nombre_comercial: str = Form(""),
+    regimen_iva: str = Form("general"),
+    periodicidad_iva: str = Form("trimestral"),
+    cnae: str = Form(""),
+    direccion: str = Form(""),
+    municipio: str = Form(""),
+    provincia: str = Form(""),
+    estado: str = Form("activa"),
+):
+    await get_current_user(request)
+    await database.actualizar_empresa(tenant_id, {
+        "nif": nif.strip(), "nombre": nombre.strip(),
+        "nombre_comercial": nombre_comercial.strip() or None,
+        "regimen_iva": regimen_iva, "periodicidad_iva": periodicidad_iva,
+        "cnae": cnae.strip() or None, "direccion": direccion.strip() or None,
+        "municipio": municipio.strip() or None, "provincia": provincia.strip() or None,
+        "estado": estado,
+    })
+    return RedirectResponse(url="/advisor/clientes", status_code=303)
+
+
+@router.post("/clientes/{tenant_id}/baja")
+async def baja_cliente(request: Request, tenant_id: str):
+    """Baja lógica de la empresa (se conserva el histórico)."""
+    await get_current_user(request)
+    await database.cambiar_estado_empresa(tenant_id, "baja")
+    return RedirectResponse(url="/advisor/clientes", status_code=303)
+
+
+@router.post("/clientes/{tenant_id}/reactivar")
+async def reactivar_cliente(request: Request, tenant_id: str):
+    await get_current_user(request)
+    await database.cambiar_estado_empresa(tenant_id, "activa")
+    return RedirectResponse(url="/advisor/clientes", status_code=303)
+
+
+# ---------------------------------------------------------------------------
+# GESTIÓN DE USUARIOS (Fase B)
+# ---------------------------------------------------------------------------
+
+@router.get("/usuarios", response_class=HTMLResponse)
+async def usuarios(request: Request):
+    user = await get_current_user(request)
+    lista = await database.list_usuarios()
+    empresas = await database.list_empresas()
+    # enriquecer con nombre de empresa
+    emp_map = {e["id"]: e["nombre"] for e in empresas}
+    for u in lista:
+        u["empresa_nombre"] = emp_map.get(u.get("tenant_id"), "Asesoría")
+    return await request.app.state.render_template(
+        "advisor_usuarios.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "usuarios": lista, "empresas": empresas, "rol": user["rol"],
+        },
+    )
+
+
+@router.post("/usuarios/nuevo")
+async def crear_usuario(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    full_name: str = Form(...),
+    rol: str = Form("cliente_titular"),
+    tenant_id: str = Form(""),
+):
+    await get_current_user(request)
+    await database.crear_usuario(
+        email=email, password=password, full_name=full_name,
+        rol=rol, tenant_id=tenant_id or None,
+    )
+    return RedirectResponse(url="/advisor/usuarios", status_code=303)
+
+
+@router.post("/usuarios/{usuario_id}/editar")
+async def editar_usuario(
+    request: Request,
+    usuario_id: str,
+    full_name: str = Form(...),
+    rol: str = Form(...),
+):
+    await get_current_user(request)
+    await database.actualizar_usuario(usuario_id, full_name=full_name, rol=rol)
+    return RedirectResponse(url="/advisor/usuarios", status_code=303)
+
+
+@router.post("/usuarios/{usuario_id}/estado")
+async def estado_usuario(request: Request, usuario_id: str, activo: str = Form("1")):
+    """Activa/desactiva un usuario (baja lógica)."""
+    await get_current_user(request)
+    await database.cambiar_estado_usuario(usuario_id, activo == "1")
+    return RedirectResponse(url="/advisor/usuarios", status_code=303)
 
 
 @router.get("/tareas", response_class=HTMLResponse)

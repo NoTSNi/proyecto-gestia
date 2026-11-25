@@ -19,13 +19,14 @@ Conectar la inteligencia que ya existe al producto.
 
 **Definición de "hecho"**: un asesor pregunta "¿qué tiene que presentar Tech Solutions este trimestre?" y recibe una respuesta razonada con datos reales de la BD.
 
-## Fase B — Administración completa multi-tenant
+## Fase B — Administración completa multi-tenant (✅ completada)
 
-- [ ] Editar empresa (datos fiscales, dirección, régimen, estado)
-- [ ] Baja/reactivación de empresas (baja lógica con histórico)
-- [ ] Gestión de usuarios desde la web: alta, edición, cambio de rol, activar/desactivar
-- [ ] Roles: superadmin, admin_asesoria, asesor_*, cliente_titular, cliente_empleado
-- [ ] Generación automática de obligaciones al dar de alta (303, 111, TC1/TC2 según régimen y CNAE)
+- [x] Editar empresa (datos fiscales, dirección, régimen, estado)
+- [x] Baja/reactivación de empresas (baja lógica con histórico)
+- [x] Gestión de usuarios desde la web: alta, edición, cambio de rol, activar/desactivar
+- [x] Roles: superadmin, admin_asesoria, asesor_*, cliente_titular, cliente_empleado
+- [x] Generación automática de obligaciones al dar de alta (303, 111, TC1/TC2 según régimen y CNAE)
+- [x] Selector de empresa cliente en el chat del asesor (consulta multi-empresa)
 
 ## Fase C — Ciclo de facturas con validación del cliente
 

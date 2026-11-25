@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Usuarios - GESTIA{% endblock %}
+{% block nav_items %}{% include "partials/_advisor_nav.html" %}{% endblock %}
+{% block page_title %}Gestión de usuarios{% endblock %}
+{% block header_actions %}<a href="/auth/logout" class="p-2 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-800/50 transition-colors" title="Cerrar sesión"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></a>{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <!-- Alta de usuario -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold text-text-primary mb-4">Dar de alta un usuario</h3>
+        <form method="post" action="/advisor/usuarios/nuevo" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Nombre completo</label>
+                <input name="full_name" required placeholder="Nombre Apellido" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Email</label>
+                <input type="email" name="email" required placeholder="usuario@empresa.com" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Contraseña (mín. 8)</label>
+                <input type="password" name="password" required minlength="8" placeholder="••••••••" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary placeholder-text-quaternary focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm text-text-secondary mb-1.5">Rol</label>
+                <select name="rol" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                    <option value="cliente_titular">Cliente - Titular</option>
+                    <option value="cliente_empleado">Cliente - Empleado</option>
+                    <option value="asesor_contable">Asesor Contable</option>
+                    <option value="asesor_mercantil">Asesor Mercantil</option>
+                    <option value="asesor_administrativo">Asesor Administrativo</option>
+                    <option value="asesor_personal">Asesor de Personal</option>
+                    <option value="admin_asesoria">Admin de Asesoría</option>
+                    <option value="superadmin">Superadministrador</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-4">
+                <label class="block text-sm text-text-secondary mb-1.5">Empresa asignada (solo para clientes)</label>
+                <select name="tenant_id" class="w-full px-3 py-2 bg-surface-800/50 border border-border-subtle rounded-lg text-text-primary">
+                    <option value="">— Asesoría (sin empresa) —</option>
+                    {% for e in empresas %}
+                    <option value="{{ e.id }}">{{ e.nombre }} ({{ e.nif }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-4">
+                <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Crear usuario</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Listado -->
+    <section class="bg-surface-900/50 border border-border-subtle rounded-xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle">
+            <h3 class="font-semibold text-text-primary">{{ usuarios|length }} usuarios</h3>
+        </header>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-text-quaternary uppercase tracking-wider border-b border-border-subtle">
+                        <th class="px-6 py-3">Usuario</th>
+                        <th class="px-6 py-3">Email</th>
+                        <th class="px-6 py-3">Rol</th>
+                        <th class="px-6 py-3">Empresa</th>
+                        <th class="px-6 py-3">Estado</th>
+                        <th class="px-6 py-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for u in usuarios %}
+                    <tr class="hover:bg-surface-800/30 transition-colors">
+                        <td class="px-6 py-4 font-medium text-text-primary">{{ u.full_name }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ u.email }}</td>
+                        <td class="px-6 py-4 text-text-secondary">{{ u.rol }}</td>
+                        <td class="px-6 py-4 text-text-tertiary">{{ u.empresa_nombre }}</td>
+                        <td class="px-6 py-4">
+                            {% if u.activo %}
+                            <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Activo</span>
+                            {% else %}
+                            <span class="px-3 py-1 bg-danger-500/20 border border-danger-500/30 text-danger-400 text-xs font-medium rounded-pill">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <form method="post" action="/advisor/usuarios/{{ u.id }}/editar" class="inline-flex items-center gap-1.5">
+                                    <input name="full_name" value="{{ u.full_name }}" class="px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs w-32 focus:outline-none focus:border-brand-500">
+                                    <select name="rol" class="px-2 py-1 bg-surface-800/50 border border-border-subtle rounded text-text-primary text-xs">
+                                        {% set roles = ['cliente_titular','cliente_empleado','asesor_contable','asesor_mercantil','asesor_administrativo','asesor_personal','admin_asesoria','superadmin'] %}
+                                        {% for r in roles %}
+                                        <option value="{{ r }}" {% if u.rol == r %}selected{% endif %}>{{ r }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="px-2 py-1 bg-brand-600/20 border border-brand-600/30 text-brand-400 text-xs rounded hover:bg-brand-600/30 transition-colors">Guardar</button>
+                                </form>
+                                {% if u.activo %}
+                                <form method="post" action="/advisor/usuarios/{{ u.id }}/estado" class="inline">
+                                    <input type="hidden" name="activo" value="0">
+                                    <button type="submit" class="px-2 py-1 bg-danger-500/10 border border-danger-500/30 text-danger-400 text-xs rounded hover:bg-danger-500/20 transition-colors">Desactivar</button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="/advisor/usuarios/{{ u.id }}/estado" class="inline">
+                                    <input type="hidden" name="activo" value="1">
+                                    <button type="submit" class="px-2 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs rounded hover:bg-success-500/30 transition-colors">Activar</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="px-6 py-10 text-text-tertiary">No hay usuarios.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
