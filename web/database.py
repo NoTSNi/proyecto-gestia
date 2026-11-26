@@ -135,6 +135,20 @@ CREATE TABLE IF NOT EXISTS consultas (
     FOREIGN KEY (tenant_id) REFERENCES empresas(id)
 );
 
+CREATE TABLE IF NOT EXISTS comunicaciones (
+    id         TEXT PRIMARY KEY,
+    tenant_id  TEXT NOT NULL,
+    canal      TEXT NOT NULL,          -- email | whatsapp | n8n | slack | portal
+    destino    TEXT,
+    asunto     TEXT,
+    cuerpo     TEXT,
+    estado     TEXT NOT NULL,          -- real | mock | error
+    externo_id TEXT,
+    usuario    TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES empresas(id)
+);
+
 CREATE TABLE IF NOT EXISTS facturas (
     id              TEXT PRIMARY KEY,
     tenant_id       TEXT NOT NULL,
@@ -439,6 +453,50 @@ async def list_notificaciones(tenant_id: str) -> list[dict]:
         cur = await conn.execute(
             "SELECT * FROM notificaciones WHERE tenant_id = ? ORDER BY created_at DESC", (tenant_id,)
         )
+        rows = await cur.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
+
+
+async def registrar_comunicacion(tenant_id: str, canal: str, destino: str,
+                                 asunto: str, cuerpo: str, estado: str,
+                                 externo_id: str | None = None,
+                                 usuario: str | None = None) -> None:
+    """Registra un envío de comunicación (email/whatsapp/n8n) por tenant.
+
+    Append-only para auditoría: guarda el cuerpo completo y el estado
+    (real | mock | error) con su id externo cuando lo hay.
+    """
+    conn = await get_db()
+    try:
+        await conn.execute(
+            """INSERT INTO comunicaciones
+               (id, tenant_id, canal, destino, asunto, cuerpo, estado,
+                externo_id, usuario, created_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?)""",
+            (_new_id(), tenant_id, canal, destino, asunto, cuerpo, estado,
+             externo_id, usuario, _now()),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+async def list_comunicaciones(tenant_id: str | None = None) -> list[dict]:
+    """Lista comunicaciones. Con tenant_id -> solo ese tenant; sin él, todas
+    (para el panel del asesor/superadmin, ordenadas por fecha)."""
+    conn = await get_db()
+    try:
+        if tenant_id:
+            cur = await conn.execute(
+                "SELECT * FROM comunicaciones WHERE tenant_id = ? ORDER BY created_at DESC",
+                (tenant_id,),
+            )
+        else:
+            cur = await conn.execute(
+                "SELECT * FROM comunicaciones ORDER BY created_at DESC LIMIT 200"
+            )
         rows = await cur.fetchall()
         return [dict(r) for r in rows]
     finally:

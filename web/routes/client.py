@@ -103,9 +103,17 @@ async def subir_documento(request: Request):
             contenido=contenido,
             subido_por=user["email"],
         )
-        return RedirectResponse(url="/client/documentos?ok=subido", status_code=303)
     except ArchivoRechazado as e:
         return RedirectResponse(url=f"/client/documentos?error={e}", status_code=303)
+
+    # Fase G: notificacion a n8n (automatizacion) - documento recibido.
+    from web.services.comms import PORTAL
+    await PORTAL.notificar_n8n(
+        empresa["id"], "documento_recibido",
+        {"archivo": archivo.filename, "cliente": empresa["nombre"], "tenant_id": empresa["id"]},
+        usuario=user["email"],
+    )
+    return RedirectResponse(url="/client/documentos?ok=subido", status_code=303)
 
 
 @router.get("/facturas", response_class=HTMLResponse)

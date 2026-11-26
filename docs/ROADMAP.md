@@ -79,9 +79,19 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [ ] Integrar con LLM real (RAG semántico con embeddings + modelo por agente) — Fase H
 - [ ] KB actualizable / versionable en el panel (CRUD de conocimiento)
 
-## Fase G — Canales y automatización reales
+## Fase G — Canales y automatización reales (✅ núcleo completado)
 
-- [ ] **Pendiente con el cliente**: revisar a fondo las secciones **Reportes** y **Comunicaciones** (qué reportes necesita la asesoría, qué canales y plantillas reales). Anotado en ROADMAP — hablar antes de implementar.
+- [x] **CommsPortal** (`web/services/comms.py`): capa unificada de comunicaciones con 3 canales y **modo mock seguro por defecto** (sin credenciales = demo, sin envío externo; con credenciales = envío real):
+  - **Email (SMTP real)**: `GESTIA_SMTP_HOST/PORT/USER/PASS/FROM`. Requiere host+user para saltar de mock a real (TLS).
+  - **WhatsApp (Twilio Sandbox, gratis para pruebas)**: `GESTIA_TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM`. Sin credenciales → mock.
+  - **n8n automatizaciones**: `GESTIA_N8N_WEBHOOK_URL` — GESTIA notifica eventos a workflows n8n (que a su vez pueden llamar de vuelta a GESTIA).
+- [x] **Tabla `comunicaciones`** (append-only por tenant): canal, destino, asunto, cuerpo, estado (real|mock|error), id externo, usuario, fecha — auditoría de cada envío.
+- [x] **Panel `/advisor/comunicaciones` real**: estado de cada canal (mock/real), formulario de envío de prueba (email/whatsapp/n8n) y historial de envíos.
+- [x] **Eventos n8n disparados automáticamente**: `documento_recibido` (al subir archivo validado), `factura_registrada` (alta de factura), `cliente_nuevo` (alta de empresa). Cron para plazos y alertas del monitor: pendiente (ver abajo).
+- [x] Cada envío se registra en BD igual en mock que en real.
+- [ ] **Cron de plazos próximos** (recordatorios de modelos 303/111/TC1 a clientes + alertas del monitor de seguridad) — conectar a n8n/email de forma programada.
+- [ ] **Configuración de credenciales por empresa** en el panel (hoy se configuran por variables de entorno).
+- [ ] **Reportes**: revisar a fondo con el cliente qué reportes necesita la asesoría. Anotado.
 - [ ] Chat por WhatsApp (misma lógica del chat web, transporte diferente)
 - [ ] Email real (SMTP propio, DKIM/SPF/DMARC)
 - [ ] n8n desplegado: calendario fiscal sincronizado, alertas 15/7/1 días, notificaciones multi-canal

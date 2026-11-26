@@ -114,3 +114,5 @@ config.local.py
 *.swo
 .project
 .pydevproject
+# Document Vault / datos locales
+web/data/

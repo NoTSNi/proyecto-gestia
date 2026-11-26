@@ -104,6 +104,14 @@ async def crear_cliente(
     })
     # Generar calendario de obligaciones base (303/111/TC1 según régimen)
     await database.generar_obligaciones(eid)
+    # Fase G: automatización n8n al dar de alta un cliente
+    from web.services.comms import PORTAL
+    await PORTAL.notificar_n8n(
+        eid, "cliente_nuevo",
+        {"nif": nif.strip(), "nombre": nombre.strip(), "cnae": cnae.strip(),
+         "tenant_id": eid},
+        usuario=request.cookies.get("gestia_token") or "asesor",
+    )
     return RedirectResponse(url="/advisor/clientes", status_code=303)
 
 
@@ -283,7 +291,57 @@ async def calendario(request: Request):
 @router.get("/comunicaciones", response_class=HTMLResponse)
 async def comunicaciones(request: Request):
     user = await get_current_user(request)
-    return await _simple_render(request, user, "advisor_comunicaciones.html")
+    from web.services.comms import PORTAL
+    estado = PORTAL.estado()
+    registros = await database.list_comunicaciones()
+    empresas = await database.list_empresas()
+    # destinos disponibles: email de contacto de cada empresa + usuario admin
+    return await request.app.state.render_template(
+        "advisor_comunicaciones.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "estado_canales": estado, "registros": registros,
+            "empresas": empresas, "rol": user["rol"],
+        },
+    )
+
+
+@router.post("/comunicaciones/enviar", response_class=HTMLResponse)
+async def comunicaciones_enviar(request: Request, canal: str = Form(...),
+                                destino: str = Form(...), asunto: str = Form(""),
+                                cuerpo: str = Form(...)):
+    """Envía una comunicación al canal elegido (email/whatsapp/n8n) y registra."""
+    user = await get_current_user(request)
+    from web.services.comms import PORTAL
+    if canal == "whatsapp":
+        res = await PORTAL.enviar_whatsapp("sistema", destino, cuerpo, user["full_name"])
+    elif canal == "n8n":
+        import json
+        try:
+            payload = json.loads(cuerpo)
+        except Exception:
+            payload = {"nota": cuerpo}
+        res = await PORTAL.notificar_n8n("sistema", asunto or "evento", payload,
+                                         user["full_name"])
+    else:  # email por defecto
+        res = await PORTAL.enviar_email("sistema", destino, asunto or "GESTIA",
+                                        cuerpo, user["full_name"])
+    registros = await database.list_comunicaciones()
+    empresas = await database.list_empresas()
+    estado = PORTAL.estado()
+    return await request.app.state.render_template(
+        "advisor_comunicaciones.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "estado_canales": estado, "registros": registros,
+            "empresas": empresas, "rol": user["rol"],
+            "envio_resultado": res, "envio_canal": canal,
+        },
+    )
 
 
 @router.get("/reportes", response_class=HTMLResponse)

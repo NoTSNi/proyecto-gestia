@@ -6,23 +6,89 @@
 
 {% block content %}
 <div class="space-y-6 animate-fade-in">
+    {% if envio_resultado %}
+    <div class="bg-surface-900/50 border {% if envio_resultado.estado == 'error' %}border-destructive-500/40 bg-destructive-500/10{% else %}border-success-500/40 bg-success-500/10{% endif %} rounded-2xl p-4 text-sm">
+        <p class="font-medium {% if envio_resultado.estado == 'error' %}text-destructive-400{% else %}text-success-500{% endif %}">
+            Resultado ({{ envio_canal }}): {{ envio_resultado.estado }}
+        </p>
+        <p class="text-text-tertiary mt-1">{{ envio_resultado.info }}</p>
+    </div>
+    {% endif %}
+
     <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
         <h2 class="text-xl font-semibold tracking-tight">Centro de comunicaciones</h2>
-        <p class="text-text-tertiary text-sm mt-1">Email, WhatsApp, Slack y portal centralizados. Los canales externos se habilitan configurando credenciales en la ficha de cada empresa.</p>
+        <p class="text-text-tertiary text-sm mt-1">Cada envío se registra para auditoría. En <strong class="text-text-primary">modo mock</strong> (sin credenciales) no llega a ningún servicio externo; es una demo segura. Configura SMTP / Twilio / n8n para envío real.</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {% for canal in ["Email", "WhatsApp", "Slack", "Portal"] %}
-        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 flex items-center justify-between">
-            <div>
-                <p class="font-semibold text-text-primary">{{ canal }}</p>
-                <p class="text-sm text-text-tertiary mt-1">Disponible</p>
+
+    <!-- Estado de canales -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for canal, etiqueta in [("email","Email (SMTP)"), ("whatsapp","WhatsApp (Twilio Sandbox)"), ("n8n","Automatizaciones (n8n)")] %}
+        {% set modo = estado_canales.get(canal, "mock") %}
+        <article class="bg-surface-900/50 border border-border-subtle rounded-xl p-5">
+            <div class="flex items-center justify-between">
+                <p class="font-semibold text-text-primary">{{ etiqueta }}</p>
+                <span class="px-2.5 py-1 {% if modo == 'real' %}bg-success-500/20 border border-success-500/30 text-success-500{% else %}bg-warning-500/20 border border-warning-500/30 text-warning-500{% endif %} text-xs font-medium rounded-pill">{{ modo }}</span>
             </div>
-            <span class="px-3 py-1 bg-success-500/20 border border-success-500/30 text-success-500 text-xs font-medium rounded-pill">Activo</span>
+            <p class="text-xs text-text-tertiary mt-2">
+                {% if canal == "email" %}Requiere GESTIA_SMTP_HOST/USER/PASS/FROM. Sin credenciales → mock.
+                {% elif canal == "whatsapp" %}Prueba gratuita con el Sandbox de Twilio (GESTIA_TWILIO_*).
+                {% else %}Requiere GESTIA_N8N_WEBHOOK_URL. Sin webhook → mock.
+                {% endif %}
+            </p>
         </article>
         {% endfor %}
     </div>
-    <div class="bg-surface-900/50 border border-border-subtle rounded-xl p-6 text-sm text-text-tertiary">
-        Las plantillas multi-canal (documento_recibido, documento_procesado, deadline_proximo, modelo_calculado, nomina_lista, contrato_por_vencer, escrito_plazo) quedaron validadas en la suite de CommsPortal.
+
+    <!-- Formulario de envío -->
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl p-6">
+        <h3 class="font-semibold tracking-tight">Enviar comunicación (prueba)</h3>
+        <form method="post" action="/advisor/comunicaciones/enviar" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+                <label class="text-sm text-text-tertiary">Canal</label>
+                <select name="canal" class="mt-1 w-full bg-surface-800 border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                    <option value="email">Email</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="n8n">n8n (automatización)</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-sm text-text-tertiary">Destino (email / teléfono WhatsApp / clave de evento para n8n)</label>
+                <input name="destino" required placeholder="cliente@empresa.com" class="mt-1 w-full bg-surface-800 border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+            <div>
+                <label class="text-sm text-text-tertiary">Asunto (o nombre del evento n8n)</label>
+                <input name="asunto" placeholder="Asunto" class="mt-1 w-full bg-surface-800 border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"/>
+            </div>
+            <div>
+                <label class="text-sm text-text-tertiary">Mensaje / payload</label>
+                <textarea name="cuerpo" required rows="1" placeholder="Mensaje… (para n8n puedes pegar JSON)" class="mt-1 w-full bg-surface-800 border border-border-subtle rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"></textarea>
+            </div>
+            <div class="sm:col-span-2">
+                <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-colors">Enviar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Log de comunicaciones -->
+    <div class="bg-surface-900/50 border border-border-subtle rounded-2xl overflow-hidden">
+        <header class="px-6 py-4 border-b border-border-subtle">
+            <h3 class="font-semibold tracking-tight">Historial de comunicaciones</h3>
+        </header>
+        <div class="divide-y divide-border-subtle">
+            {% if registros %}
+            {% for r in registros[:30] %}
+            <div class="px-6 py-3 flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm"><span class="text-text-tertiary">{{ r.created_at }}</span> · <span class="font-medium text-text-primary">{{ r.canal | upper }}</span> → <span class="text-text-secondary">{{ r.destino }}</span></p>
+                    <p class="text-xs text-text-tertiary mt-0.5 truncate max-w-xl">{{ r.asunto }} — {{ r.cuerpo[:80] }}{% if r.cuerpo|length > 80 %}…{% endif %}</p>
+                </div>
+                <span class="px-2 py-1 {% if r.estado == 'error' %}bg-destructive-500/20 text-destructive-400{% elif r.estado == 'real' %}bg-success-500/20 text-success-500{% else %}bg-warning-500/20 text-warning-500{% endif %} text-xs font-medium rounded-pill shrink-0">{{ r.estado }}</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="px-6 py-4 text-sm text-text-tertiary">Todavía no hay envíos registrados.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
