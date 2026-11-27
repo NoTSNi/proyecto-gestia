@@ -17,6 +17,12 @@ from web.security import COOKIE_NAME, decode_token
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Cargar variables de entorno desde .env (credenciales SMTP/Twilio/n8n...)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        pass
     # Inicializar BD SQLite + seed demo (idempotente)
     await database.init_db()
     app.state.db_ready = True

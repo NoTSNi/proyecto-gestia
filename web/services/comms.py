@@ -87,7 +87,13 @@ class WhatsAppClient:
         self.sid = os.getenv("GESTIA_TWILIO_ACCOUNT_SID", "")
         self.token = os.getenv("GESTIA_TWILIO_AUTH_TOKEN", "")
         self.frm = os.getenv("GESTIA_TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
-        self.mode = "real" if (self.sid and self.token) else "mock"
+        # Opción A (no disponible en cuenta trial sin plantilla propia): enviar
+        # con ContentSid de plantilla aprobada. En trial las plantillas tienen
+        # SID por cuenta y solo 3 mensajes fijos -> WhatsApp se queda en MOCK
+        # por defecto para no intentar envíos fallidos.
+        self.content_sid = os.getenv("GESTIA_TWILIO_CONTENT_SID", "")
+        # Si hay credenciales Y una plantilla válida de la cuenta -> real
+        self.mode = "real" if (self.sid and self.token and self.content_sid) else "mock"
 
     async def enviar(self, destino: str, cuerpo: str) -> dict:
         if self.mode == "mock":
@@ -96,12 +102,20 @@ class WhatsAppClient:
         import urllib.request
         import urllib.parse
         import base64
+        import json
         url = (f"https://api.twilio.com/2010-04-01/Accounts/{self.sid}/Messages.json")
-        data = urllib.parse.urlencode({
+        params = {
             "To": f"whatsapp:{destino}",
             "From": self.frm,
-            "Body": cuerpo,
-        }).encode()
+        }
+        if self.content_sid:
+            # Plantilla aprobada: el cuerpo va en la variable 1 de la plantilla
+            # (Appointment Reminders: "Your appointment is coming up on {{1}} at {{2}}").
+            params["ContentSid"] = self.content_sid
+            params["ContentVariables"] = json.dumps({"1": cuerpo, "2": "ahora"})
+        else:
+            params["Body"] = cuerpo
+        data = urllib.parse.urlencode(params).encode()
         req = urllib.request.Request(url, data=data)
         req.add_header("Authorization", "Basic " + base64.b64encode(
             f"{self.sid}:{self.token}".encode()).decode())

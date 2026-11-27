@@ -90,11 +90,9 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [x] **Eventos n8n disparados automáticamente**: `documento_recibido` (al subir archivo validado), `factura_registrada` (alta de factura), `cliente_nuevo` (alta de empresa). Cron para plazos y alertas del monitor: pendiente (ver abajo).
 - [x] Cada envío se registra en BD igual en mock que en real.
 - [ ] **Cron de plazos próximos** (recordatorios de modelos 303/111/TC1 a clientes + alertas del monitor de seguridad) — conectar a n8n/email de forma programada.
-- [ ] **Configuración de credenciales por empresa** en el panel (hoy se configuran por variables de entorno).
+- [ ] **Configuración de credenciales por empresa** en el panel (hoy se configuran por variables de entorno en `.env`).
 - [ ] **Reportes**: revisar a fondo con el cliente qué reportes necesita la asesoría. Anotado.
-- [ ] Chat por WhatsApp (misma lógica del chat web, transporte diferente)
-- [ ] Email real (SMTP propio, DKIM/SPF/DMARC)
-- [ ] n8n desplegado: calendario fiscal sincronizado, alertas 15/7/1 días, notificaciones multi-canal
+- [ ] **WhatsApp real: PENDIENTE/OPCIONAL** — la cuenta Twilio trial solo permite enviar 3 plantillas fijas (texto libre bloqueado, ContentSid por cuenta). Decisión del cliente: dejar WhatsApp en **modo mock** por ahora y priorizar Email + n8n reales. Para WhatsApp real hará falta: cuenta Twilio de pago (o WhatsApp Business API) con plantillas propias, y definir `GESTIA_TWILIO_CONTENT_SID` de una de ellas. El código soporta el salto mock→real.
 - [ ] API/SFTP para ERP (clientes grandes)
 
 ## Fase H — Producción
