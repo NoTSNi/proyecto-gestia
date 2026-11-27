@@ -89,7 +89,7 @@ Flujo: alta → pendiente → validación del cliente (con corrección) → fusi
 - [x] **Panel `/advisor/comunicaciones` real**: estado de cada canal (mock/real), formulario de envío de prueba (email/whatsapp/n8n) y historial de envíos.
 - [x] **Eventos n8n disparados automáticamente**: `documento_recibido` (al subir archivo validado), `factura_registrada` (alta de factura), `cliente_nuevo` (alta de empresa). Cron para plazos y alertas del monitor: pendiente (ver abajo).
 - [x] Cada envío se registra en BD igual en mock que en real.
-- [ ] **Cron de plazos próximos** (recordatorios de modelos 303/111/TC1 a clientes + alertas del monitor de seguridad) — conectar a n8n/email de forma programada.
+- [ ] **Cron de plazos próximos** — ✅ **implementado y verificable** (`web/services/recordatorios.py` + `scripts/cron_recordatorios.py`): envía por email a cada empresa sus obligaciones a 7/3/1 días. Panel `/advisor/recordatorios` con vista previa y botón "Enviar ahora". **Pendiente: programar la ejecución diaria en el Task Scheduler de Windows** (comando: `.venv/Scripts/python.exe scripts\cron_recordatorios.py`).
 - [ ] **Configuración de credenciales por empresa** en el panel (hoy se configuran por variables de entorno en `.env`).
 - [ ] **Reportes**: revisar a fondo con el cliente qué reportes necesita la asesoría. Anotado.
 - [ ] **WhatsApp real: PENDIENTE/OPCIONAL** — la cuenta Twilio trial solo permite enviar 3 plantillas fijas (texto libre bloqueado, ContentSid por cuenta). Decisión del cliente: dejar WhatsApp en **modo mock** por ahora y priorizar Email + n8n reales. Para WhatsApp real hará falta: cuenta Twilio de pago (o WhatsApp Business API) con plantillas propias, y definir `GESTIA_TWILIO_CONTENT_SID` de una de ellas. El código soporta el salto mock→real.

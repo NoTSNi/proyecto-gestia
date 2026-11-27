@@ -344,6 +344,41 @@ async def comunicaciones_enviar(request: Request, canal: str = Form(...),
     )
 
 
+@router.get("/recordatorios", response_class=HTMLResponse)
+async def recordatorios_page(request: Request):
+    """Panel de recordatorios: vista previa (sin enviar) + botón de envío."""
+    user = await get_current_user(request)
+    from web.services.recordatorios import recordatorios_todas
+    # Vista previa: calcular sin enviar (muestra qué tocaría)
+    resumen = await recordatorios_todas(enviar=False)
+    return await request.app.state.render_template(
+        "advisor_recordatorios.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "resumen": resumen, "rol": user["rol"], "ejecutado": False,
+        },
+    )
+
+
+@router.post("/recordatorios/enviar", response_class=HTMLResponse)
+async def recordatorios_enviar(request: Request):
+    """Ejecuta los recordatorios por email a todas las empresas."""
+    user = await get_current_user(request)
+    from web.services.recordatorios import recordatorios_todas
+    resumen = await recordatorios_todas(enviar=True)
+    return await request.app.state.render_template(
+        "advisor_recordatorios.html",
+        {
+            "request": request, "user": user,
+            "user_initials": _initials(user["full_name"]),
+            "user_name": user["full_name"], "user_role": _role_label(user["rol"]),
+            "resumen": resumen, "rol": user["rol"], "ejecutado": True,
+        },
+    )
+
+
 @router.get("/reportes", response_class=HTMLResponse)
 async def reportes(request: Request):
     user = await get_current_user(request)
